@@ -1,220 +1,155 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>成語特工：語境大解密</title>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>特工挑戰任務</title>
     <style>
-        body { background: #0d1117; color: white; font-family: 'PingFang TC', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
-        #game-box { width: 650px; min-height: 450px; border: 4px solid #00f2fe; border-radius: 20px; text-align: center; padding: 30px; background: #1a2332; box-shadow: 0 0 20px #00f2fe; position: relative; }
-        .btn { background: #ffeb3b; color: #000; padding: 12px 30px; border: none; border-radius: 30px; font-size: 1.2em; cursor: pointer; font-weight: bold; margin: 10px; transition: 0.2s; }
-        .btn:hover { transform: scale(1.05); background: #fff176; }
-        .level-btn { background: #4facfe; color: white; width: 120px; }
-        .opt-btn { background: rgba(79,172,254,0.1); border: 2px solid #4facfe; color: #4facfe; padding: 15px; margin: 10px; font-size: 1.4em; cursor: pointer; width: 280px; transition: 0.2s; border-radius: 10px; }
-        .opt-btn:hover { background: #4facfe; color: white; box-shadow: 0 0 15px #4facfe; }
-        #quiz, #explanation, #end { display: none; }
-        .exp-box { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; text-align: left; margin: 20px 0; line-height: 1.6; border-left: 5px solid #ffeb3b; }
+        /* 全域樣式：字體全面放大，背景深色特工風格 */
+        body {
+            background-color: #1a1f26;
+            color: #ffffff;
+            font-family: "Microsoft JhengHei", sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        /* 遊戲主容器：加上閃爍邊框 */
+        .game-container {
+            width: 90%;
+            max-width: 800px;
+            background: #252d3a;
+            border: 5px solid #00f2ff;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.3);
+        }
+
+        /* 標題字體加大 */
+        #status-title {
+            font-size: 64px; /* 極大標題 */
+            color: #00f2ff;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+
+        /* 分數與成語詳解區域 */
+        .content-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            border-left: 10px solid #ffd700;
+            margin-bottom: 40px;
+            text-align: left;
+        }
+
+        .score-text {
+            font-size: 48px; /* 分數加大 */
+            color: #ffd700;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .info-text {
+            font-size: 32px; /* 詳解文字加大 */
+            line-height: 1.6;
+            margin: 10px 0;
+        }
+
+        /* 按鈕樣式：超級明顯的大黃鈕 */
+        .action-btn {
+            background-color: #ffeb3b;
+            color: #000;
+            font-size: 36px; /* 按鈕字體加大 */
+            padding: 20px 60px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        .action-btn:hover {
+            transform: scale(1.1);
+            background-color: #fff176;
+        }
+
+        /* 晉級成功特效 */
+        .glow-animation {
+            animation: glow 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #ffd700; }
+            to { text-shadow: 0 0 20px #fff, 0 0 30px #ffea00, 0 0 40px #ffea00; }
+        }
     </style>
 </head>
 <body>
-    <div id="game-box">
-        <div id="start">
-            <h1 style="color:#00f2fe; font-size: 2.5em; text-shadow: 0 0 10px #00f2fe;">成語特工：語境大解密</h1>
-            <p>請選擇您的訓練等級：</p>
-            <div id="levels">
-                <button class="btn level-btn" onclick="selectLevel(1)">LV.1 初級</button>
-                <button class="btn level-btn" onclick="selectLevel(2)">LV.2 中級</button>
-                <button class="btn level-btn" onclick="selectLevel(3)">LV.3 高級</button>
-                <button class="btn level-btn" onclick="selectLevel(4)">LV.4 特級</button>
-            </div>
-        </div>
 
-        <div id="quiz">
-            <div style="display:flex; justify-content: space-between; color:#8b949e;">
-                <span id="lvl-tag">等級: --</span>
-                <span>積分: <span id="score">0</span></span>
-            </div>
-            <h2 id="def" style="margin: 50px 0; font-size: 1.8em;">解釋載入中...</h2>
-            <div id="opts"></div>
-        </div>
-
-        <div id="explanation">
-            <h2 id="res-title"></h2>
-            <div class="exp-box">
-                <p><strong>【成語】：</strong><span id="exp-a" style="color:#ffeb3b; font-size:1.5em"></span></p>
-                <p><strong>【詳解】：</strong><span id="exp-d"></span></p>
-            </div>
-            <button class="btn" onclick="nextQ()">繼續前進</button>
-        </div>
-
-        <div id="end">
-            <h1 style="font-size: 3em; color: #00f2fe;">任務完成</h1>
-            <h2 style="color:#ffeb3b; font-size: 2em;">最終得分：<span id="final-s">0</span></h2>
-            <p id="end-msg" style="font-size: 1.2em; margin-bottom: 20px;"></p>
-            <button class="btn" onclick="location.reload()">重新挑戰</button>
-        </div>
+<div class="game-container" id="game-ui">
+    <div id="status-title">任務完成</div>
+    
+    <div class="content-box">
+        <div class="score-text" id="final-score-display">最終得分：800</div>
+        <div class="info-text" id="sub-message">🎉 恭喜！你已達到特工標準！</div>
     </div>
 
+    <button class="action-btn" id="main-btn" onclick="handleButtonClick()">重新挑戰</button>
+</div>
+
+<audio id="victory-audio" src="https://actions.google.com/sounds/v1/science_fiction/deep_space.ogg"></audio>
+
 <script>
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    // 模擬當前得分 (實際應用中由您的遊戲邏輯傳入)
+    let currentScore = 850; 
+    let currentLevel = 1;
 
-    function playTone(type) {
-        if(audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        
-        const now = audioCtx.currentTime;
+    function initEndScreen() {
+        const title = document.getElementById("status-title");
+        const scoreDisp = document.getElementById("final-score-display");
+        const msg = document.getElementById("sub-message");
+        const btn = document.getElementById("main-btn");
+        const audio = document.getElementById("victory-audio");
 
-        if(type === 'correct') {
-            // "Yes!" 音效：快速向上的兩個音
-            osc.frequency.setValueAtTime(523.25, now); // C5
-            osc.frequency.exponentialRampToValueAtTime(880, now + 0.1); // A5
-            gain.gain.setValueAtTime(0.1, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-            osc.start();
-            osc.stop(now + 0.3);
-        } else if(type === 'wrong') {
-            // "Wrong" 音效：低沈且帶點震動感
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(150, now);
-            osc.frequency.linearRampToValueAtTime(100, now + 0.4);
-            gain.gain.setValueAtTime(0.1, now);
-            gain.gain.linearRampToValueAtTime(0, now + 0.4);
-            osc.start();
-            osc.stop(now + 0.4);
-        } else if(type === 'victory') {
-            // 達標大驚喜音效：大合奏
-            const notes = [523, 659, 783, 1046]; // C大三和弦
-            notes.forEach((freq, i) => {
-                const o = audioCtx.createOscillator();
-                const g = audioCtx.createGain();
-                o.connect(g); g.connect(audioCtx.destination);
-                o.frequency.setValueAtTime(freq, now + (i * 0.1));
-                g.gain.setValueAtTime(0.1, now + (i * 0.1));
-                g.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
-                o.start(now + (i * 0.1));
-                o.stop(now + 1);
-            });
-        }
-    }
+        scoreDisp.innerText = "最終得分：" + currentScore;
 
-    const masterBank = [
-        { q: "形容非常有禮貌地邀請人才。", a: "三顧茅廬", alt: "走馬看花", d: "劉備三次拜訪諸葛亮，形容求才誠意。", lv: 1 },
-        { q: "比喻做事不澈底，沒有恆心。", a: "半途而廢", alt: "堅持不懈", d: "事情做一半就停止，形容意志不堅。", lv: 1 },
-        { q: "形容看慣了就不覺得奇怪。", a: "司空見慣", alt: "異想天開", d: "比喻事物經常見到，不足為奇。", lv: 1 },
-        { q: "比喻物歸原主，完好無損。", a: "完璧歸趙", alt: "據為己有", d: "藺相如將和氏璧完好帶回趙國。", lv: 1 },
-        { q: "形容人與人之間感情深厚。", a: "手足之情", alt: "萍水相逢", d: "比喻兄弟或好朋友之間親密的感情。", lv: 1 },
-        { q: "比喻只要有恆心，必能成功。", a: "磨杵成針", alt: "揠苗助長", d: "只要努力不懈，連鐵棒都能磨成針。", lv: 1 },
-        { q: "形容人非常疲累。", a: "精疲力竭", alt: "神采奕奕", d: "精神與體力都消耗殆盡。", lv: 1 },
-        { q: "比喻事物變化巨大。", a: "滄海桑田", alt: "一成不變", d: "大海變成了農田，形容世事變化極大。", lv: 1 },
-        { q: "比喻模仿他人不成，反而出醜。", a: "東施效顰", alt: "青出於藍", d: "醜女模仿美女皺眉，反而更醜。", lv: 1 },
-        { q: "形容非常有勇氣，不畏艱難。", a: "披荊斬棘", alt: "畏首畏尾", d: "撥開荊棘前進，比喻克服困難。", lv: 1 },
-        { q: "比喻隱藏實力，等待機會。", a: "韜光養晦", alt: "鋒芒畢露", d: "收斂光芒，不輕易顯露才華。", lv: 2 },
-        { q: "形容情況極為危險。", a: "危如累卵", alt: "安如泰山", d: "危險得像堆疊起來的蛋，隨時會碎。", lv: 2 },
-        { q: "比喻真心待人，毫無保留。", a: "推心置腹", alt: "貌合神離", d: "把心放在別人腹中，形容極為真誠。", lv: 2 },
-        { q: "形容學問廣博，見識豐富。", a: "博學多聞", alt: "孤陋寡聞", d: "廣泛學習並聽取各種知識。", lv: 2 },
-        { q: "比喻虛幻、沒有根據的想法。", a: "空中樓閣", alt: "腳踏實地", d: "在虛空中蓋樓，比喻脫離現實的幻想。", lv: 2 },
-        { q: "比喻對不懂的人講深奧道理。", a: "對牛彈琴", alt: "循循善誘", d: "比喻對不講理或不懂的人白費唇舌。", lv: 2 },
-        { q: "形容非常有默契，心意相通。", a: "心領神會", alt: "莫名其妙", d: "不必明說，心裡就能明白對方意思。", lv: 2 },
-        { q: "比喻情況雖然危險但還有轉機。", a: "絕處逢生", alt: "走投無路", d: "在走投無路時，又發現了生機。", lv: 2 },
-        { q: "形容說話有條理，很有說服力。", a: "侃侃而談", alt: "語無倫次", d: "理直氣壯、從容不迫地談話。", lv: 2 },
-        { q: "比喻做事過頭，反而有害。", a: "矯枉過正", alt: "恰到好處", d: "糾正錯誤超過了限度，反而不對。", lv: 2 },
-        { q: "比喻模仿他人不成，失去自我。", a: "邯鄲學步", alt: "青出於藍", d: "燕國人學邯鄲人走路，最後爬著回家。", lv: 3 },
-        { q: "比喻決心戰鬥到底，不留後路。", a: "破釜沉舟", alt: "苟且偷安", d: "打碎鍋子、鑿沉船隻，表示必死決心。", lv: 3 },
-        { q: "比喻事先準備，以防萬一。", a: "未雨綢繆", alt: "臨渴掘井", d: "天還沒下雨就先修房子，比喻先預防。", lv: 3 },
-        { q: "形容文章寫得極好，廣為流傳。", a: "洛陽紙貴", alt: "乏人問津", d: "形容著作風行一時，使紙張變貴。", lv: 3 },
-        { q: "比喻處境危險，隨時會被消滅。", a: "魚游釜中", alt: "游刃有餘", d: "魚在鍋子裡游，比喻生命危在旦夕。", lv: 3 },
-        { q: "形容做事情乾脆利落，不拖拉。", a: "斬釘截鐵", alt: "猶豫不決", d: "比喻態度堅決，毫不猶豫。", lv: 3 },
-        { q: "比喻受過驚嚇的人，遇到一點動靜就害怕。", a: "草木皆兵", alt: "泰然自若", d: "把草木都看成士兵，形容極度驚恐。", lv: 3 },
-        { q: "形容生活極度窮困。", a: "捉襟見肘", alt: "衣食無缺", d: "拉下衣襟就露出胳膊，形容窮於應付。", lv: 3 },
-        { q: "比喻做多餘的事，反而招致失敗。", a: "畫蛇添足", alt: "錦上添花", d: "畫蛇時幫牠畫腳，形容多此一舉。", lv: 3 },
-        { q: "比喻對眼前的事物視而不見。", a: "視若無睹", alt: "察言觀色", d: "雖然常看到，卻像沒看到一樣。", lv: 3 },
-        { q: "比喻超越權限，代人處理政事。", a: "越俎代庖", alt: "恪盡職守", d: "放下祭器去幫廚師做飯，形容管閒事。", lv: 4 },
-        { q: "形容罪惡多得寫不完。", a: "罄竹難書", alt: "功德無量", d: "用盡所有竹簡也寫不完其罪狀。", lv: 4 },
-        { q: "比喻禍亂發生在內部。", a: "禍起蕭牆", alt: "攘外安內", d: "蕭牆是屏風，比喻內部發生變亂。", lv: 4 },
-        { q: "比喻見識淺薄的人。", a: "井底之蛙", alt: "坐井觀天", d: "青蛙住在井底，比喻眼界狹小。", lv: 4 },
-        { q: "比喻非常有學問的人。", a: "腹笥淵博", alt: "胸無點墨", d: "形容肚子像書箱一樣裝滿了書。", lv: 4 },
-        { q: "比喻因小失大。", a: "削足適履", alt: "量體裁衣", d: "削掉腳趾去穿鞋，比喻勉強遷就。", lv: 4 },
-        { q: "比喻做事勉強，不會有好結果。", a: "揠苗助長", alt: "順其自然", d: "拔高禾苗幫它生長，反而讓它枯死。", lv: 4 },
-        { q: "比喻受過苦後對類似事物極度敏感。", a: "驚弓之鳥", alt: "處變不驚", d: "被箭射傷過的鳥，聽到弓弦聲就害怕。", lv: 4 },
-        { q: "形容雖然身處危險卻不自知。", a: "燕雀處堂", alt: "高枕無憂", d: "燕子在屋簷下築巢，不知屋子將失火。", lv: 4 },
-        { q: "比喻才華卓越的人。", a: "鳳毛麟角", alt: "凡夫俗子", d: "比喻開展稀罕珍貴的人才或事物。", lv: 4 }
-    ];
-
-    let filteredQ = [];
-    let cur = 0;
-    let score = 0;
-
-    function selectLevel(l) {
-        if(audioCtx.state === 'suspended') audioCtx.resume();
-        filteredQ = masterBank.filter(i => i.lv === l).sort(() => Math.random() - 0.5).slice(0, 10);
-        document.getElementById('lvl-tag').innerText = "等級: LV." + l;
-        document.getElementById('score').innerText = "0";
-        score = 0;
-        cur = 0;
-        document.getElementById('start').style.display = 'none';
-        document.getElementById('quiz').style.display = 'block';
-        show();
-    }
-
-    function show() {
-        const item = filteredQ[cur];
-        document.getElementById('def').innerText = item.q;
-        let b = [
-            `<button class="opt-btn" onclick="chk('${item.a}')">${item.a}</button>`,
-            `<button class="opt-btn" onclick="chk('${item.alt}')">${item.alt}</button>`
-        ];
-        document.getElementById('opts').innerHTML = b.sort(() => Math.random() - 0.5).join("");
-    }
-
-    function chk(ua) {
-        const item = filteredQ[cur];
-        const isC = ua === item.a;
-        
-        if(isC) {
-            score += 100;
-            playTone('correct');
-        } else {
-            playTone('wrong');
-        }
-        
-        document.getElementById('res-title').innerText = isC ? "🎯 正確！" : "❌ 失敗！";
-        document.getElementById('res-title').style.color = isC ? "#4caf50" : "#f44336";
-        document.getElementById('exp-a').innerText = item.a;
-        document.getElementById('exp-d').innerText = item.d;
-        
-        document.getElementById('quiz').style.display = 'none';
-        document.getElementById('explanation').style.display = 'block';
-    }
-
-    function nextQ() {
-        cur++;
-        if(cur >= filteredQ.length) {
-            document.getElementById('explanation').style.display = 'none';
-            document.getElementById('end').style.display = 'block';
-            document.getElementById('final-s').innerText = score;
+        if (currentScore >= 800) {
+            // --- 方案 A：達標晉級邏輯 ---
+            title.innerText = "菁英特工 晉升成功！";
+            title.classList.add("glow-animation");
+            msg.innerText = "🚀 總部已分派更難的任務，準備好接受挑戰了嗎？";
+            btn.innerText = "執行下一項任務";
             
-            if(score >= 800) {
-                document.getElementById('end-msg').innerText = "🎉 恭喜！你已達到特工標準！";
-                playTone('victory');
-                var end = Date.now() + (3 * 1000);
-                (function frame() {
-                    confetti({ particleCount: 7, angle: 60, spread: 55, origin: { x: 0 } });
-                    confetti({ particleCount: 7, angle: 120, spread: 55, origin: { x: 1 } });
-                    if (Date.now() < end) requestAnimationFrame(frame);
-                }());
-            } else {
-                document.getElementById('end-msg').innerText = "還差一點點！再挑戰一次成為特工吧！";
-            }
+            // 播放震撼音效 (這裡暫用長音效替代，您可換成您的 mp3)
+            audio.play(); 
         } else {
-            document.getElementById('explanation').style.display = 'none';
-            document.getElementById('quiz').style.display = 'block';
-            document.getElementById('score').innerText = score;
-            show();
+            // 未達標邏輯
+            title.innerText = "任務結束";
+            msg.innerText = "尚未達到特工標準，請再次訓練！";
+            btn.innerText = "重新挑戰";
         }
     }
+
+    function handleButtonClick() {
+        if (currentScore >= 800) {
+            alert("正在進入下一關：難度增加 20%！");
+            // 這裡放進入第二關的程式碼
+            location.reload(); // 暫時以重新整理模擬
+        } else {
+            location.reload();
+        }
+    }
+
+    // 頁面載入後自動執行
+    window.onload = initEndScreen;
 </script>
+
 </body>
 </html>
