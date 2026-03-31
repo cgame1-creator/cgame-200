@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>成語特工：航太終端</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <style>
+        :root { --cyan: #00f2ff; --purple: #bc13fe; --orange: #ff9d00; --gold: #ffd700; --red: #ff3131; --green: #39ff14; --bg: #050a0f; }
+        body { background-color: var(--bg); color: #fff; font-family: "Microsoft JhengHei", sans-serif; margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; background: radial-gradient(circle, #0d1b2a 0%, #050a0f 100%); }
+        .hud-border { width: 95vw; height: 95vh; border: 3px solid var(--cyan); border-radius: 40px; position: relative; display: flex; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; box-shadow: inset 0 0 50px rgba(0, 242, 255, 0.2), 0 0 30px rgba(0, 242, 255, 0.4); background: rgba(13, 17, 23, 0.95); }
+        .main-title { font-size: 75px; font-weight: 900; color: #fff; text-shadow: 0 0 20px var(--cyan); margin: 10px 0; font-style: italic; }
+        .level-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; width: 85%; margin-top: 20px; }
+        .level-btn { background: rgba(255, 255, 255, 0.05); border: 4px solid #fff; border-radius: 20px; height: 180px; display: flex; align-items: center; padding-left: 40px; cursor: pointer; transition: 0.3s; }
+        .level-btn:hover { transform: translateY(-5px); background: rgba(255,255,255,0.1); box-shadow: 0 0 40px currentColor; }
+        .lv-tag { font-size: 50px; font-weight: 900; }
+        .timer-big { font-size: 130px; font-weight: bold; color: var(--cyan); text-shadow: 0 0 20px var(--cyan); }
+        .timer-urgent { color: var(--red); animation: shake 0.1s infinite; }
+        .q-text { font-size: 55px; font-weight: bold; margin: 30px 0; text-align: center; }
+        .opt-btn { width: 85%; padding: 22px; margin-bottom: 15px; font-size: 45px; border-radius: 20px; border: 3px solid var(--cyan); background: rgba(0,242,255,0.05); color: #fff; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .opt-correct { background: var(--green) !important; color: #000; border-color: var(--green) !important; box-shadow: 0 0 60px var(--green); }
+        .opt-wrong { background: var(--red) !important; color: #fff; border-color: var(--red) !important; animation: shake 0.4s 1; }
+        .expl-panel { width: 88%; font-size: 38px; padding: 20px 40px; border-radius: 20px; margin-top: 15px; border: 4px solid; line-height: 1.4; background: rgba(0,0,0,0.6); }
+        .expl-ok { border-color: var(--green); color: var(--green); }
+        .expl-fail { border-color: var(--red); color: var(--red); }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-20px); } 40% { transform: translateX(20px); } 60% { transform: translateX(-20px); } 80% { transform: translateX(20px); } }
+        .score-hero { font-size: 240px; color: var(--gold); font-weight: 900; text-shadow: 0 0 80px var(--gold); margin: 10px 0; }
+    </style>
+</head>
+<body>
+
+<div class="hud-border" id="app"></div>
+
+<script>
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function synth(freq, type, duration, vol, delay=0) {
+        setTimeout(() => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + duration);
+        }, delay);
+    }
+    const SFX = {
+        dingdong: () => { synth(659, 'sine', 0.4, 0.2); synth(880, 'sine', 0.5, 0.2, 150); synth(659, 'sine', 0.4, 0.2, 350); synth(880, 'sine', 0.5, 0.2, 500); },
+        babuu: () => { synth(233, 'sawtooth', 0.6, 0.3); synth(233, 'sawtooth', 0.5, 0.2, 50); setTimeout(() => { synth(174, 'sawtooth', 0.8, 0.3); synth(174, 'sawtooth', 0.7, 0.2, 50); }, 350); },
+        win: () => { [523, 659, 783, 1046, 1318].forEach((f, i) => synth(f, 'square', 0.7, 0.1, i * 180)); }
+    };
+
+    const rawData = [
+        ["三顧茅廬","拜訪名師，誠心求才。","走馬看花，隨便觀察。","劉備三次拜訪諸葛亮，形容求才誠意。",1],
+        ["半途而廢","事情停擺，意志不堅。","堅持不懈，努力到底。","事情做一半就停止，形容意志不堅。",1],
+        ["司空見慣","事物常見，不足為奇。","異想天開，不切實際。","比喻事物經常見到，不足為奇。",1],
+        ["完璧歸趙","完好帶回，歸還原主。","貪心佔有，據為己有。","藺相如將和氏璧完好帶回趙國。",1],
+        ["手足之情","感情深厚，如同兄弟。","萍水相逢，毫無交情。","比喻兄弟或好朋友之間親密的感情。",1],
+        ["對牛彈琴","白費唇舌，道理深奧。","循循善誘，引導學生。","比喻對不講理或不懂的人白費唇舌。",2],
+        ["視若無睹","看見卻不理，當沒看到。","認真觀察，分辨色彩。","雖然常看到，卻像沒看到一樣不加理會。",3],
+        ["罄竹難書","罪大惡極，寫不完數。","功德無量，善行眾多。", "形容罪惡多得寫不完。",4],
+        ["博學多聞","廣泛學習，見識豐富。","見識淺薄，孤陋寡聞。","廣泛學習並聽取各種知識。",2],
+        ["破釜沉舟","決心戰鬥，不留後路。","苟且偷安，得過且過。","打碎鍋子、鑿沉船隻，表示必死決心。",3],
+        ["鳳毛麟角","珍貴稀少，優秀人才。","凡夫俗子，平庸之輩。","比喻稀罕珍貴的人才或事物。",4]
+    ];
+
+    let lv = 1, score = 0, qIdx = 0, timeLeft = 10, timerId = null, quizSet = [], currentMax = 10, lvName = "";
+    const app = document.getElementById('app');
+    const lvMap = { 1: "執行特工", 2: "資深特派", 3: "王牌特攻", 4: "特級首席" };
+
+    function showLobby() {
+        if(timerId) clearInterval(timerId);
+        currentMax = 10;
+        app.innerHTML = `
+            <div style="font-size:70px;">🦅</div>
+            <div class="main-title">成語特工：航太終端</div>
+            <div style="font-size:32px; margin-bottom:30px; color:var(--cyan)">職銜任務序列：</div>
+            <div class="level-grid">
+                <div class="level-btn" style="border-color:var(--cyan); color:var(--cyan)" onclick="start(1)"><div class="lv-tag">${lvMap[1]}</div></div>
+                <div class="level-btn" style="border-color:var(--purple); color:var(--purple)" onclick="start(2)"><div class="lv-tag">${lvMap[2]}</div></div>
+                <div class="level-btn" style="border-color:var(--orange); color:var(--orange)" onclick="start(3)"><div class="lv-tag">${lvMap[3]}</div></div>
+                <div class="level-btn" style="border-color:var(--gold); color:var(--gold)" onclick="start(4)"><div class="lv-tag">${lvMap[4]}</div></div>
+            </div>
+        `;
+    }
+
+    function start(n, fast = false) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        lv = n; lvName = lvMap[n]; score = 0; qIdx = 0; 
+        currentMax = fast ? 7 : 10;
+        quizSet = rawData.filter(d => d[4] === n).sort(() => Math.random() - 0.5).slice(0, 10);
+        run();
+    }
+
+    function run() {
+        if (qIdx >= quizSet.length) { finish(); return; }
+        if (timerId) clearInterval(timerId);
+        
+        timeLeft = currentMax;
+        let d = quizSet[qIdx];
+        let options = [{text: d[1], isCorrect: true}, {text: d[2], isCorrect: false}].sort(() => Math.random() - 0.5);
+        
+        app.innerHTML = `
+            <div style="width:100%; display:flex; justify-content:space-between; align-items:center; padding:0 30px; box-sizing:border-box;">
+                <span style="font-size:30px; color:var(--cyan)">${lvName}</span>
+                <div class="timer-big" id="t">${timeLeft}</div>
+                <span style="font-size:30px; color:var(--cyan)">MISSION: ${qIdx+1}/10</span>
+            </div>
+            <div class="q-text">「${d[0]}」的意思是？</div>
+            <button class="opt-btn" id="opt0" onclick="handleCheck(0, ${options[0].isCorrect})">${options[0].text}</button>
+            <button class="opt-btn" id="opt1" onclick="handleCheck(1, ${options[1].isCorrect})">${options[1].text}</button>
+            <div id="expl-area"></div>
+        `;
+
+        timerId = setInterval(() => {
+            timeLeft--; 
+            const tEl = document.getElementById('t');
+            if (tEl) {
+                tEl.innerText = timeLeft;
+                if (timeLeft <= 3) tEl.className = "timer-big timer-urgent";
+            }
+            if (timeLeft <= 0) { 
+                clearInterval(timerId); 
+                SFX.babuu(); 
+                alert("通訊超時！任務強制中止。"); 
+                showLobby(); 
+            }
+        }, 1000);
+    }
+
+    function handleCheck(btnIndex, isCorrect) {
+        if (timerId) clearInterval(timerId); // 立即停止計時
+        const d = quizSet[qIdx];
+        const explArea = document.getElementById('expl-area');
+        const btn0 = document.getElementById('opt0'), btn1 = document.getElementById('opt1');
+        
+        btn0.onclick = null; btn1.onclick = null; // 禁用按鈕
+
+        if (isCorrect) {
+            score += 100; SFX.dingdong();
+            document.getElementById('opt' + btnIndex).classList.add('opt-correct');
+            explArea.innerHTML = `<div class="expl-panel expl-ok">⭐ 通訊正確：${d[3]}</div>`;
+        } else {
+            SFX.babuu();
+            document.getElementById('opt' + btnIndex).classList.add('opt-wrong');
+            document.getElementById('opt' + (1 - btnIndex)).classList.add('opt-correct');
+            explArea.innerHTML = `<div class="expl-panel expl-fail">❌ 攔截分析：${d[3]}</div>`;
+            app.animate([{transform:'translateX(-20px)'},{transform:'translateX(20px)'},{transform:'translateX(0)'}], {duration:100, iterations:3});
+        }
+        
+        qIdx++; // 只有答題或錯題才增加索引
+        setTimeout(run, 3000);
+    }
+
+    function finish() {
+        if(timerId) clearInterval(timerId);
+        if (score >= 800) {
+            SFX.win();
+            let end = Date.now() + 4000;
+            (function frame() { confetti({ particleCount: 20, spread: 80, origin: { y: 0.6 } }); if (Date.now() < end) requestAnimationFrame(frame); }());
+            app.innerHTML = `
+                <div class="main-title">評定成功！</div>
+                <div class="score-hero">${score}</div>
+                <div style="font-size:40px; margin-bottom:30px;">精英評定達成，通訊連結穩定。</div>
+                <button class="opt-btn" style="width:60%; border-color:var(--gold); color:var(--gold)" onclick="start(lv, true)">⚡ 挑戰原職：加速版 (7秒)</button>
+                <button class="opt-btn" style="width:60%" onclick="showLobby()">⭐ 返回總部晉升職銜</button>
+            `;
+        } else {
+            SFX.babuu();
+            app.innerHTML = `<div class="main-title" style="color:var(--red)">任務失敗</div><div class="score-hero" style="color:var(--red)">${score}</div><button class="opt-btn" style="width:60%" onclick="showLobby()">重新受訓</button>`;
+        }
+    }
+    showLobby();
+</script>
+</body>
+</html>
