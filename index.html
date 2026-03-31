@@ -3,153 +3,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>特工挑戰任務</title>
+    <title>成語特工：航太終端</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
-        /* 全域樣式：字體全面放大，背景深色特工風格 */
-        body {
-            background-color: #1a1f26;
-            color: #ffffff;
-            font-family: "Microsoft JhengHei", sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-        }
-
-        /* 遊戲主容器：加上閃爍邊框 */
-        .game-container {
-            width: 90%;
-            max-width: 800px;
-            background: #252d3a;
-            border: 5px solid #00f2ff;
-            border-radius: 20px;
-            padding: 40px;
-            text-align: center;
-            box-shadow: 0 0 30px rgba(0, 242, 255, 0.3);
-        }
-
-        /* 標題字體加大 */
-        #status-title {
-            font-size: 64px; /* 極大標題 */
-            color: #00f2ff;
-            margin-bottom: 30px;
-            font-weight: bold;
-        }
-
-        /* 分數與成語詳解區域 */
-        .content-box {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 30px;
-            border-radius: 15px;
-            border-left: 10px solid #ffd700;
-            margin-bottom: 40px;
-            text-align: left;
-        }
-
-        .score-text {
-            font-size: 48px; /* 分數加大 */
-            color: #ffd700;
-            margin: 20px 0;
-            text-align: center;
-        }
-
-        .info-text {
-            font-size: 32px; /* 詳解文字加大 */
-            line-height: 1.6;
-            margin: 10px 0;
-        }
-
-        /* 按鈕樣式：超級明顯的大黃鈕 */
-        .action-btn {
-            background-color: #ffeb3b;
-            color: #000;
-            font-size: 36px; /* 按鈕字體加大 */
-            padding: 20px 60px;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-        }
-
-        .action-btn:hover {
-            transform: scale(1.1);
-            background-color: #fff176;
-        }
-
-        /* 晉級成功特效 */
-        .glow-animation {
-            animation: glow 1s ease-in-out infinite alternate;
-        }
-
-        @keyframes glow {
-            from { text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #ffd700; }
-            to { text-shadow: 0 0 20px #fff, 0 0 30px #ffea00, 0 0 40px #ffea00; }
-        }
+        :root { --cyan: #00f2ff; --purple: #bc13fe; --orange: #ff9d00; --gold: #ffd700; --red: #ff3131; --green: #39ff14; --bg: #050a0f; }
+        body { background-color: var(--bg); color: #fff; font-family: "Microsoft JhengHei", sans-serif; margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; background: radial-gradient(circle, #0d1b2a 0%, #050a0f 100%); }
+        .hud-border { width: 95vw; height: 95vh; border: 3px solid var(--cyan); border-radius: 40px; position: relative; display: flex; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; box-shadow: inset 0 0 50px rgba(0, 242, 255, 0.2), 0 0 30px rgba(0, 242, 255, 0.4); background: rgba(13, 17, 23, 0.95); }
+        .main-title { font-size: 75px; font-weight: 900; color: #fff; text-shadow: 0 0 20px var(--cyan); margin: 10px 0; font-style: italic; text-align: center; }
+        .level-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; width: 85%; margin-top: 20px; }
+        .level-btn { background: rgba(255, 255, 255, 0.05); border: 4px solid #fff; border-radius: 20px; height: 180px; display: flex; align-items: center; padding-left: 40px; cursor: pointer; transition: 0.3s; }
+        .level-btn:hover { transform: translateY(-5px); background: rgba(255,255,255,0.1); box-shadow: 0 0 40px currentColor; }
+        .lv-tag { font-size: 50px; font-weight: 900; letter-spacing: 2px; }
+        .timer-big { font-size: 130px; font-weight: bold; color: var(--cyan); text-shadow: 0 0 20px var(--cyan); }
+        .timer-urgent { color: var(--red); animation: shake 0.1s infinite; }
+        .q-text { font-size: 55px; font-weight: bold; margin: 30px 0; text-align: center; }
+        .opt-btn { width: 85%; padding: 22px; margin-bottom: 15px; font-size: 45px; border-radius: 20px; border: 3px solid var(--cyan); background: rgba(0,242,255,0.05); color: #fff; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .opt-correct { background: var(--green) !important; color: #000; border-color: var(--green) !important; box-shadow: 0 0 60px var(--green); }
+        .opt-wrong { background: var(--red) !important; color: #fff; border-color: var(--red) !important; animation: shake 0.4s 1; }
+        .expl-panel { width: 88%; font-size: 38px; padding: 20px 40px; border-radius: 20px; margin-top: 15px; border: 4px solid; line-height: 1.4; background: rgba(0,0,0,0.4); }
+        .expl-ok { border-color: var(--green); color: var(--green); }
+        .expl-fail { border-color: var(--red); color: var(--red); }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-20px); } 40% { transform: translateX(20px); } 60% { transform: translateX(-20px); } 80% { transform: translateX(20px); } }
+        .score-hero { font-size: 240px; color: var(--gold); font-weight: 900; text-shadow: 0 0 80px var(--gold); margin: 10px 0; }
     </style>
 </head>
 <body>
 
-<div class="game-container" id="game-ui">
-    <div id="status-title">任務完成</div>
-    
-    <div class="content-box">
-        <div class="score-text" id="final-score-display">最終得分：800</div>
-        <div class="info-text" id="sub-message">🎉 恭喜！你已達到特工標準！</div>
-    </div>
-
-    <button class="action-btn" id="main-btn" onclick="handleButtonClick()">重新挑戰</button>
-</div>
-
-<audio id="victory-audio" src="https://actions.google.com/sounds/v1/science_fiction/deep_space.ogg"></audio>
+<div class="hud-border" id="app"></div>
 
 <script>
-    // 模擬當前得分 (實際應用中由您的遊戲邏輯傳入)
-    let currentScore = 850; 
-    let currentLevel = 1;
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function synth(freq, type, duration, vol, delay=0) {
+        setTimeout(() => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + duration);
+        }, delay);
+    }
+    const SFX = {
+        dingdong: () => { synth(659, 'sine', 0.4, 0.2); synth(880, 'sine', 0.5, 0.2, 150); synth(659, 'sine', 0.4, 0.2, 350); synth(880, 'sine', 0.5, 0.2, 500); },
+        babuu: () => { synth(233, 'sawtooth', 0.6, 0.3); synth(233, 'sawtooth', 0.5, 0.2, 50); setTimeout(() => { synth(174, 'sawtooth', 0.8, 0.3); synth(174, 'sawtooth', 0.7, 0.2, 50); }, 350); },
+        win: () => { [523, 659, 783, 1046, 1318].forEach((f, i) => synth(f, 'square', 0.7, 0.1, i * 180)); }
+    };
 
-    function initEndScreen() {
-        const title = document.getElementById("status-title");
-        const scoreDisp = document.getElementById("final-score-display");
-        const msg = document.getElementById("sub-message");
-        const btn = document.getElementById("main-btn");
-        const audio = document.getElementById("victory-audio");
+    const rawData = [
+        ["三顧茅廬","拜訪名師，誠心求才。","走馬看花，隨便觀察。","劉備三次拜訪諸葛亮，形容求才誠意。",1],
+        ["半途而廢","事情停擺，意志不堅。","堅持不懈，努力到底。","事情做一半就停止，形容意志不堅。",1],
+        ["司空見慣","事物常見，不足為奇。","異想天開，不切實際。","比喻事物經常見到，不足為奇。",1],
+        ["完璧歸趙","完好帶回，歸還原主。","貪心佔有，據為己有。","藺相如將和氏璧完好帶回趙國。",1],
+        ["手足之情","感情深厚，如同兄弟。","萍水相逢，毫無交情。","比喻兄弟或好朋友之間親密的感情。",1],
+        ["磨杵成針","只要恆心，必能成功。","急於求成，揠苗助長。","只要努力不懈，連鐵棒都能磨成針。",1],
+        ["精疲力竭","耗盡體力，非常疲累。","神采奕奕，精神飽滿。","精神與體力都消耗殆盡。",1],
+        ["滄海桑田","世事變動，變化極大。","維持原狀，一成不變。","大海變成了農田，形容世事變化極大。",1],
+        ["東施效顰","胡亂模仿，反而出醜。","表現卓越，青出於藍。","醜女模仿美女皺眉，反而更醜。",1],
+        ["披荊斬棘","勇敢前進，不畏艱難。","畏縮不前，畏首畏尾。","撥開荊棘前進，比喻克服困難。",1],
+        ["韜光養晦","收斂光芒，隱藏實力。","炫耀才華，鋒芒畢露。","收斂光芒，不輕易顯露才華。",2],
+        ["危如累卵","情況危险，隨時破裂。","非常安穩，安如泰山。","危險得像堆疊起來的蛋，隨時會碎。",2],
+        ["推心置腹","真心待人，毫無保留。","虛情假意，貌合神離。","把心放在別人腹中，形容極為真誠。",2],
+        ["博學多聞","廣泛學習，見識豐富。","見識淺薄，孤陋寡聞。","廣泛學習並聽取各種知識。",2],
+        ["空中樓閣","脫離現實，只是幻想。","做事踏實，腳踏實地。","在空中蓋樓，比喻脫離現實的幻想。",2],
+        ["對牛彈琴","白費唇舌，道理深奧。","循循善誘，引導學生。","比喻對不講理或不懂的人白費唇舌。",2],
+        ["心領神會","心裡明白，極有默契。","莫名其妙，完全不懂。","不必明說，心裡就能明白對方意思。",2],
+        ["絕處逢生","出現生機，絕後轉機。","無路可走，走投無路。","在走投無路時，又發現了生機。",2],
+        ["侃侃而談","說話有理，說服力強。","語無倫次，胡言亂語。","理直氣壯、從容不迫地談話。",2],
+        ["矯枉過正","糾正過度，反而有害。","恰到好處，掌握分寸。","糾正錯誤超過了限度，反而不對。",2],
+        ["邯鄲學步","喪失自我，亂學他人。","表現傑出，青出於藍。","燕國人學邯鄲人走路，最後爬著回家。",3],
+        ["破釜沉舟","決心戰鬥，不留後路。","苟且偷安，得過且過。","打碎鍋子、鑿沉船隻，表示必死決心。",3],
+        ["未雨綢繆","預先防範，做好準備。","臨渴掘井，臨時湊合。","天還沒下雨就先修房子，比喻先預防。",3],
+        ["洛陽紙貴","著作風行，受人歡迎。","無人問津，銷售慘淡。","形容著作風行一時，使紙張變貴。",3],
+        ["魚游釜中","生命危險，命在旦夕。","游刃有餘，處理輕鬆。","魚在鍋子裡游，比喻生命危在旦夕。",3],
+        ["斬釘截鐵","態度堅決，毫不猶豫。","猶豫不決，舉棋不定。","比喻態度堅決，毫不猶豫。",3],
+        ["草木皆兵","極度驚恐，疑神疑鬼。","泰然自若，冷靜應對。","把草木都看成士兵，形容極度驚恐。",3],
+        ["捉襟見肘","生活貧困，窮於應付。","衣食無缺，生活富裕。","拉下衣襟就露出胳膊，形容窮於應付。",3],
+        ["畫蛇添足","多此一舉，反而失敗。","錦上添花，更趨完美。","畫蛇時幫牠畫腳，形容多此一舉。",3],
+        ["視若無睹","看見卻不理，當沒看到。","認真觀察，分辨色彩。","雖然常看到，卻像沒看到一樣不加理會。",3],
+        ["越俎代庖","管人閒事，超越權限。","恪盡職守，負責到底。", "放下祭器去幫廚師做飯，形容管閒事。",4],
+        ["罄竹難書","罪大惡極，寫不完數。","功德無量，善行眾多。", "用盡所有竹簡也寫不完其罪狀。",4],
+        ["禍起蕭牆","內部變亂，發生衝突。","對抗外敵，攘外安內。", "蕭牆是屏風，比喻內部發生變亂。",4],
+        ["井底之蛙","見識淺薄，眼界狹小。","學識豐富，坐井觀天。", "青蛙住在井底，比喻眼界狹小。",4],
+        ["腹笥淵博","學問豐富，飽讀詩書。","胸無點墨，毫無才學。", "形容肚子像書箱一樣裝滿了書。",4],
+        ["削足適履","勉強遷就，因小失大。","量體裁衣，非常合適。", "削掉腳趾去穿鞋，比喻勉強遷就。",4],
+        ["揠苗助長","急於求成，反而害死。","順其自然，緩步生長。", "拔高禾苗幫它生長，反而讓它枯死。",4],
+        ["驚弓之鳥","受過驚嚇，極度敏感。","處變不驚，冷靜從容。", "被箭射傷過的鳥，聽到弓弦聲就害怕。",4],
+        ["燕雀處堂","不知危險，大禍將至。","高枕無憂，安穩睡眠。", "燕子在屋簷下築巢，不知屋子將失火。",4],
+        ["鳳毛麟角","珍貴稀少，優秀人才。","凡夫俗子，平庸之輩。", "比喻稀罕珍貴的人才或事物。",4]
+    ];
 
-        scoreDisp.innerText = "最終得分：" + currentScore;
+    let lv = 1, score = 0, qIdx = 0, timeLeft = 10, timerId = null, quizSet = [], currentMax = 10, lvName = "";
+    const app = document.getElementById('app');
+    const lvMap = { 1: "執行特工", 2: "資深特派", 3: "王牌特攻", 4: "特級首席" };
 
-        if (currentScore >= 800) {
-            // --- 方案 A：達標晉級邏輯 ---
-            title.innerText = "菁英特工 晉升成功！";
-            title.classList.add("glow-animation");
-            msg.innerText = "🚀 總部已分派更難的任務，準備好接受挑戰了嗎？";
-            btn.innerText = "執行下一項任務";
-            
-            // 播放震撼音效 (這裡暫用長音效替代，您可換成您的 mp3)
-            audio.play(); 
-        } else {
-            // 未達標邏輯
-            title.innerText = "任務結束";
-            msg.innerText = "尚未達到特工標準，請再次訓練！";
-            btn.innerText = "重新挑戰";
-        }
+    function showLobby() {
+        clearInterval(timerId); currentMax = 10;
+        app.innerHTML = `
+            <div style="font-size:70px;">🦅</div>
+            <div class="main-title">成語特工：航太終端</div>
+            <div style="font-size:32px; margin-bottom:30px; color:var(--cyan)">職銜任務序列：</div>
+            <div class="level-grid">
+                <div class="level-btn" style="border-color:var(--cyan); color:var(--cyan)" onclick="start(1)"><div class="lv-tag">${lvMap[1]}</div></div>
+                <div class="level-btn" style="border-color:var(--purple); color:var(--purple)" onclick="start(2)"><div class="lv-tag">${lvMap[2]}</div></div>
+                <div class="level-btn" style="border-color:var(--orange); color:var(--orange)" onclick="start(3)"><div class="lv-tag">${lvMap[3]}</div></div>
+                <div class="level-btn" style="border-color:var(--gold); color:var(--gold)" onclick="start(4)"><div class="lv-tag">${lvMap[4]}</div></div>
+            </div>
+        `;
     }
 
-    function handleButtonClick() {
-        if (currentScore >= 800) {
-            alert("正在進入下一關：難度增加 20%！");
-            // 這裡放進入第二關的程式碼
-            location.reload(); // 暫時以重新整理模擬
-        } else {
-            location.reload();
-        }
+    function start(n, fast = false) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        lv = n; lvName = lvMap[n]; score = 0; qIdx = 0; currentMax = fast ? 7 : 10;
+        quizSet = rawData.filter(d => d[4] === n).sort(() => Math.random() - 0.5).slice(0, 10);
+        run();
     }
 
-    // 頁面載入後自動執行
-    window.onload = initEndScreen;
+    function run() {
+        if (qIdx >= quizSet.length) { finish(); return; }
+        clearInterval(timerId); timeLeft = currentMax;
+        let d = quizSet[qIdx];
+        let options = [{text: d[1], isCorrect: true}, {text: d[2], isCorrect: false}].sort(() => Math.random() - 0.5);
+        
+        app.innerHTML = `
+            <div style="width:100%; display:flex; justify-content:space-between; align-items:center; padding:0 30px; box-sizing:border-box;">
+                <span style="font-size:30px; color:var(--cyan)">${lvName}</span>
+                <div class="timer-big" id="t">${timeLeft}</div>
+                <span style="font-size:30px; color:var(--cyan)">MISSION: ${qIdx+1}/10</span>
+            </div>
+            <div class="q-text">「${d[0]}」的意思是？</div>
+            <button class="opt-btn" id="opt0" onclick="check(0, ${options[0].isCorrect})">${options[0].text}</button>
+            <button class="opt-btn" id="opt1" onclick="check(1, ${options[1].isCorrect})">${options[1].text}</button>
+            <div id="expl-area"></div>
+        `;
+
+        timerId = setInterval(() => {
+            timeLeft--; document.getElementById('t').innerText = timeLeft;
+            if (timeLeft <= 3) document.getElementById('t').className = "timer-big timer-urgent";
+            if (timeLeft <= 0) { clearInterval(timerId); SFX.babuu(); showLobby(); }
+        }, 1000);
+    }
+
+    function check(btnIndex, isCorrect) {
+        clearInterval(timerId);
+        const d = quizSet[qIdx];
+        const explArea = document.getElementById('expl-area');
+        const btn0 = document.getElementById('opt0'), btn1 = document.getElementById('opt1');
+        btn0.onclick = null; btn1.onclick = null;
+
+        if (isCorrect) {
+            score += 100; SFX.dingdong();
+            document.getElementById('opt' + btnIndex).classList.add('opt-correct');
+            explArea.innerHTML = `<div class="expl-panel expl-ok">⭐ 通訊正確：${d[3]}</div>`;
+        } else {
+            SFX.babuu();
+            document.getElementById('opt' + btnIndex).classList.add('opt-wrong');
+            document.getElementById('opt' + (1 - btnIndex)).classList.add('opt-correct');
+            explArea.innerHTML = `<div class="expl-panel expl-fail">❌ 攔截分析：${d[3]}</div>`;
+            app.animate([{transform:'translateX(-20px)'},{transform:'translateX(20px)'},{transform:'translateX(0)'}], {duration:100, iterations:3});
+        }
+        qIdx++;
+        setTimeout(run, 3000);
+    }
+
+    function finish() {
+        if (score >= 800) {
+            SFX.win();
+            let end = Date.now() + 4000;
+            (function frame() { confetti({ particleCount: 20, spread: 80, origin: { y: 0.6 } }); if (Date.now() < end) requestAnimationFrame(frame); }());
+            app.innerHTML = `
+                <div class="main-title">評定成功！</div>
+                <div class="score-hero">${score}</div>
+                <div style="font-size:40px; margin-bottom:30px;">恭喜！達成特工評定目標。</div>
+                <button class="opt-btn" style="width:60%; border-color:var(--gold); color:var(--gold)" onclick="start(lv, true)">⚡ 挑戰原職：加速版 (7秒)</button>
+                <button class="opt-btn" style="width:60%" onclick="showLobby()">⭐ 返回總部晉升職銜</button>
+            `;
+        } else {
+            SFX.babuu();
+            app.innerHTML = `<div class="main-title" style="color:var(--red)">任務失敗</div><div class="score-hero" style="color:var(--red)">${score}</div><button class="opt-btn" style="width:60%" onclick="showLobby()">重新受訓</button>`;
+        }
+    }
+    showLobby();
 </script>
-
 </body>
 </html>
