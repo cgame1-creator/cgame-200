@@ -50,40 +50,54 @@
         <div id="end">
             <h1 style="font-size: 3em; color: #00f2fe;">任務完成</h1>
             <h2 style="color:#ffeb3b; font-size: 2em;">最終得分：<span id="final-s">0</span></h2>
-            <p id="end-msg"></p>
+            <p id="end-msg" style="font-size: 1.2em; margin-bottom: 20px;"></p>
             <button class="btn" onclick="location.reload()">重新挑戰</button>
         </div>
     </div>
 
 <script>
-    // 音效產生器 (不需外部檔案)
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
     function playTone(type) {
+        if(audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         
-        if(type === 'correct') {
-            osc.frequency.setValueAtTime(880, audioCtx.currentTime); // A5 高音
-            osc.frequency.exponentialRampToValueAtTime(1320, audioCtx.currentTime + 0.1);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.3);
-        } else {
-            osc.frequency.setValueAtTime(110, audioCtx.currentTime); // A2 低音
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
-            osc.type = 'sawtooth';
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.5);
-        }
-    }
+        const now = audioCtx.currentTime;
 
-    // 碎紙特效
-    function launchConfetti() {
-        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+        if(type === 'correct') {
+            // "Yes!" 音效：快速向上的兩個音
+            osc.frequency.setValueAtTime(523.25, now); // C5
+            osc.frequency.exponentialRampToValueAtTime(880, now + 0.1); // A5
+            gain.gain.setValueAtTime(0.1, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+            osc.start();
+            osc.stop(now + 0.3);
+        } else if(type === 'wrong') {
+            // "Wrong" 音效：低沈且帶點震動感
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(150, now);
+            osc.frequency.linearRampToValueAtTime(100, now + 0.4);
+            gain.gain.setValueAtTime(0.1, now);
+            gain.gain.linearRampToValueAtTime(0, now + 0.4);
+            osc.start();
+            osc.stop(now + 0.4);
+        } else if(type === 'victory') {
+            // 達標大驚喜音效：大合奏
+            const notes = [523, 659, 783, 1046]; // C大三和弦
+            notes.forEach((freq, i) => {
+                const o = audioCtx.createOscillator();
+                const g = audioCtx.createGain();
+                o.connect(g); g.connect(audioCtx.destination);
+                o.frequency.setValueAtTime(freq, now + (i * 0.1));
+                g.gain.setValueAtTime(0.1, now + (i * 0.1));
+                g.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+                o.start(now + (i * 0.1));
+                o.stop(now + 1);
+            });
+        }
     }
 
     const masterBank = [
@@ -126,8 +140,7 @@
         { q: "比喻做事勉強，不會有好結果。", a: "揠苗助長", alt: "順其自然", d: "拔高禾苗幫它生長，反而讓它枯死。", lv: 4 },
         { q: "比喻受過苦後對類似事物極度敏感。", a: "驚弓之鳥", alt: "處變不驚", d: "被箭射傷過的鳥，聽到弓弦聲就害怕。", lv: 4 },
         { q: "形容雖然身處危險卻不自知。", a: "燕雀處堂", alt: "高枕無憂", d: "燕子在屋簷下築巢，不知屋子將失火。", lv: 4 },
-        { q: "比喻才華卓越的人。", a: "鳳毛麟角", alt: "凡夫俗子", d: "比喻稀罕珍貴的人才或事物。", lv: 4 },
-        { q: "形容雖然很普通，但能平安度過。", a: "隨遇而安", alt: "怨天尤人", d: "能適應各種環境，感到知足。", lv: 1 }
+        { q: "比喻才華卓越的人。", a: "鳳毛麟角", alt: "凡夫俗子", d: "比喻開展稀罕珍貴的人才或事物。", lv: 4 }
     ];
 
     let filteredQ = [];
@@ -137,7 +150,6 @@
     function selectLevel(l) {
         if(audioCtx.state === 'suspended') audioCtx.resume();
         filteredQ = masterBank.filter(i => i.lv === l).sort(() => Math.random() - 0.5).slice(0, 10);
-        if(filteredQ.length === 0) { alert("此等級尚無題目！"); return; }
         document.getElementById('lvl-tag').innerText = "等級: LV." + l;
         document.getElementById('score').innerText = "0";
         score = 0;
@@ -184,18 +196,17 @@
             document.getElementById('end').style.display = 'block';
             document.getElementById('final-s').innerText = score;
             
-            // 結局大彩蛋：滿分噴發碎紙
-            if(score === 1000) {
-                document.getElementById('end-msg').innerText = "特工天才！完美達成任務！";
+            if(score >= 800) {
+                document.getElementById('end-msg').innerText = "🎉 恭喜！你已達到特工標準！";
+                playTone('victory');
                 var end = Date.now() + (3 * 1000);
                 (function frame() {
-                    confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
-                    confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
+                    confetti({ particleCount: 7, angle: 60, spread: 55, origin: { x: 0 } });
+                    confetti({ particleCount: 7, angle: 120, spread: 55, origin: { x: 1 } });
                     if (Date.now() < end) requestAnimationFrame(frame);
                 }());
             } else {
-                document.getElementById('end-msg').innerText = "繼續努力，成為成語大師！";
-                launchConfetti(); // 沒滿分也有小噴發
+                document.getElementById('end-msg').innerText = "還差一點點！再挑戰一次成為特工吧！";
             }
         } else {
             document.getElementById('explanation').style.display = 'none';
