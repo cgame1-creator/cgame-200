@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <title>成語特工：語境大解密</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        body { background: #0d1117; color: white; font-family: 'PingFang TC', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        #game-box { width: 650px; min-height: 450px; border: 4px solid #00f2fe; border-radius: 20px; text-align: center; padding: 30px; background: #1a2332; box-shadow: 0 0 20px #00f2fe; }
-        .btn { background: #ffeb3b; color: #000; padding: 12px 30px; border: none; border-radius: 30px; font-size: 1.2em; cursor: pointer; font-weight: bold; margin: 10px; }
+        body { background: #0d1117; color: white; font-family: 'PingFang TC', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
+        #game-box { width: 650px; min-height: 450px; border: 4px solid #00f2fe; border-radius: 20px; text-align: center; padding: 30px; background: #1a2332; box-shadow: 0 0 20px #00f2fe; position: relative; }
+        .btn { background: #ffeb3b; color: #000; padding: 12px 30px; border: none; border-radius: 30px; font-size: 1.2em; cursor: pointer; font-weight: bold; margin: 10px; transition: 0.2s; }
+        .btn:hover { transform: scale(1.05); background: #fff176; }
         .level-btn { background: #4facfe; color: white; width: 120px; }
-        .opt-btn { background: rgba(79,172,254,0.1); border: 2px solid #4facfe; color: #4facfe; padding: 15px; margin: 10px; font-size: 1.4em; cursor: pointer; width: 280px; transition: 0.2s; }
-        .opt-btn:hover { background: #4facfe; color: white; }
+        .opt-btn { background: rgba(79,172,254,0.1); border: 2px solid #4facfe; color: #4facfe; padding: 15px; margin: 10px; font-size: 1.4em; cursor: pointer; width: 280px; transition: 0.2s; border-radius: 10px; }
+        .opt-btn:hover { background: #4facfe; color: white; box-shadow: 0 0 15px #4facfe; }
         #quiz, #explanation, #end { display: none; }
         .exp-box { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; text-align: left; margin: 20px 0; line-height: 1.6; border-left: 5px solid #ffeb3b; }
     </style>
@@ -17,7 +19,7 @@
 <body>
     <div id="game-box">
         <div id="start">
-            <h1 style="color:#00f2fe; font-size: 2.5em;">成語特工：語境大解密</h1>
+            <h1 style="color:#00f2fe; font-size: 2.5em; text-shadow: 0 0 10px #00f2fe;">成語特工：語境大解密</h1>
             <p>請選擇您的訓練等級：</p>
             <div id="levels">
                 <button class="btn level-btn" onclick="selectLevel(1)">LV.1 初級</button>
@@ -46,13 +48,44 @@
         </div>
 
         <div id="end">
-            <h1 style="font-size: 3em;">任務完成</h1>
+            <h1 style="font-size: 3em; color: #00f2fe;">任務完成</h1>
             <h2 style="color:#ffeb3b; font-size: 2em;">最終得分：<span id="final-s">0</span></h2>
+            <p id="end-msg"></p>
             <button class="btn" onclick="location.reload()">重新挑戰</button>
         </div>
     </div>
 
 <script>
+    // 音效產生器 (不需外部檔案)
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playTone(type) {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        if(type === 'correct') {
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime); // A5 高音
+            osc.frequency.exponentialRampToValueAtTime(1320, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.3);
+        } else {
+            osc.frequency.setValueAtTime(110, audioCtx.currentTime); // A2 低音
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
+            osc.type = 'sawtooth';
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.5);
+        }
+    }
+
+    // 碎紙特效
+    function launchConfetti() {
+        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+    }
+
     const masterBank = [
         { q: "形容非常有禮貌地邀請人才。", a: "三顧茅廬", alt: "走馬看花", d: "劉備三次拜訪諸葛亮，形容求才誠意。", lv: 1 },
         { q: "比喻做事不澈底，沒有恆心。", a: "半途而廢", alt: "堅持不懈", d: "事情做一半就停止，形容意志不堅。", lv: 1 },
@@ -102,7 +135,7 @@
     let score = 0;
 
     function selectLevel(l) {
-        // 從資料庫篩選對應等級並隨機排序，每次抽 10 題
+        if(audioCtx.state === 'suspended') audioCtx.resume();
         filteredQ = masterBank.filter(i => i.lv === l).sort(() => Math.random() - 0.5).slice(0, 10);
         if(filteredQ.length === 0) { alert("此等級尚無題目！"); return; }
         document.getElementById('lvl-tag').innerText = "等級: LV." + l;
@@ -121,14 +154,19 @@
             `<button class="opt-btn" onclick="chk('${item.a}')">${item.a}</button>`,
             `<button class="opt-btn" onclick="chk('${item.alt}')">${item.alt}</button>`
         ];
-        // 隨機打亂按鈕順序
         document.getElementById('opts').innerHTML = b.sort(() => Math.random() - 0.5).join("");
     }
 
     function chk(ua) {
         const item = filteredQ[cur];
         const isC = ua === item.a;
-        if(isC) score += 100;
+        
+        if(isC) {
+            score += 100;
+            playTone('correct');
+        } else {
+            playTone('wrong');
+        }
         
         document.getElementById('res-title').innerText = isC ? "🎯 正確！" : "❌ 失敗！";
         document.getElementById('res-title').style.color = isC ? "#4caf50" : "#f44336";
@@ -145,6 +183,20 @@
             document.getElementById('explanation').style.display = 'none';
             document.getElementById('end').style.display = 'block';
             document.getElementById('final-s').innerText = score;
+            
+            // 結局大彩蛋：滿分噴發碎紙
+            if(score === 1000) {
+                document.getElementById('end-msg').innerText = "特工天才！完美達成任務！";
+                var end = Date.now() + (3 * 1000);
+                (function frame() {
+                    confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
+                    confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
+                    if (Date.now() < end) requestAnimationFrame(frame);
+                }());
+            } else {
+                document.getElementById('end-msg').innerText = "繼續努力，成為成語大師！";
+                launchConfetti(); // 沒滿分也有小噴發
+            }
         } else {
             document.getElementById('explanation').style.display = 'none';
             document.getElementById('quiz').style.display = 'block';
