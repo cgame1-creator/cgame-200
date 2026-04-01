@@ -3,158 +3,229 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>成語特工：航太終端 V4</title>
+    <title>成語特工：航太終端</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
         :root { --cyan: #00f2ff; --purple: #bc13fe; --orange: #ff9d00; --gold: #ffd700; --red: #ff3131; --green: #39ff14; --bg: #020508; }
-        body { background-color: var(--bg); color: #fff; font-family: "Microsoft JhengHei", sans-serif; margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; background: radial-gradient(circle at center, #0a192f 0%, #020508 100%); }
-        .hud-border { width: 96vw; height: 96vh; border: 2px solid rgba(0, 242, 255, 0.4); border-radius: 30px; position: relative; display: flex; flex-direction: column; align-items: center; padding: 30px; box-sizing: border-box; background: rgba(10, 25, 47, 0.6); backdrop-filter: blur(10px); box-shadow: inset 0 0 100px rgba(0,0,0,0.8), 0 0 20px rgba(0, 242, 255, 0.2); }
-        .hud-border::before { content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; border: 2px solid var(--cyan); border-radius: 30px; pointer-events: none; clip-path: polygon(0 0, 15% 0, 15% 2%, 2% 2%, 2% 15%, 0 15%, 0 0, 85% 0, 85% 2%, 98% 2%, 98% 15%, 100% 15%, 100% 0, 100% 85%, 98% 85%, 98% 98%, 85% 98%, 85% 100%, 100% 100%, 0 100%, 0 85%, 2% 85%, 2% 98%, 15% 98%, 15% 100%, 0 100%); opacity: 0.8; }
-        .main-title { font-size: 80px; font-weight: 900; color: #fff; text-shadow: 0 0 20px var(--cyan), 0 0 40px var(--cyan); margin: 10px 0; font-style: italic; letter-spacing: 10px; }
-        .level-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 35px; width: 85%; margin-top: 30px; }
-        .level-btn { background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.08) 100%); border: 3px solid #fff; border-radius: 15px; height: 200px; display: flex; align-items: center; padding-left: 50px; cursor: pointer; transition: 0.3s; }
-        .level-btn:hover { transform: translateY(-8px); background: rgba(255,255,255,0.15); box-shadow: 0 0 40px currentColor; }
-        .lv-svg { width: 90px; height: 90px; margin-right: 40px; stroke: currentColor; fill: none; filter: drop-shadow(0 0 12px currentColor); stroke-width: 1.5; }
-        .lv-tag { font-size: 50px; font-weight: 900; letter-spacing: 4px; }
+        body { background-color: var(--bg); color: #fff; font-family: "Segoe UI", "Microsoft JhengHei", sans-serif; margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; background: radial-gradient(circle at center, #0a192f 0%, #020508 100%); }
+        
+        .hud-border { 
+            width: 96vw; height: 96vh; border: 2px solid rgba(0, 242, 255, 0.3); border-radius: 30px; 
+            position: relative; display: flex; flex-direction: column; align-items: center; padding: 30px; box-sizing: border-box; 
+            background: rgba(10, 25, 47, 0.4); backdrop-filter: blur(8px);
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.8);
+        }
+
+        .hud-border::before {
+            content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            border: 3px solid var(--cyan); border-radius: 30px; pointer-events: none;
+            clip-path: polygon(0 0, 15% 0, 15% 2%, 2% 2%, 2% 15%, 0 15%, 0 0, 85% 0, 85% 2%, 98% 2%, 98% 15%, 100% 15%, 100% 0, 100% 85%, 98% 85%, 98% 98%, 85% 98%, 85% 100%, 100% 100%, 0 100%, 0 85%, 2% 85%, 2% 98%, 15% 98%, 15% 100%, 0 100%);
+        }
+
+        .main-title { font-size: 70px; font-weight: 900; color: #fff; text-shadow: 0 0 20px var(--cyan), 0 0 40px var(--cyan); margin: 10px 0; font-style: italic; letter-spacing: 8px; }
+
+        .level-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; width: 85%; margin-top: 30px; }
+        .level-btn { 
+            background: linear-gradient(145deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.08) 100%);
+            border: 3px solid #fff; border-radius: 20px; height: 180px; display: flex; align-items: center; 
+            padding-left: 40px; cursor: pointer; transition: 0.3s; position: relative;
+        }
+        .level-btn:hover { transform: translateY(-8px); background: rgba(255,255,255,0.12); box-shadow: 0 0 40px currentColor; }
+        
+        .lv-svg { width: 80px; height: 80px; margin-right: 35px; stroke: currentColor; fill: none; filter: drop-shadow(0 0 10px currentColor); stroke-width: 1.5; }
+        .lv-tag { font-size: 48px; font-weight: 900; letter-spacing: 2px; }
+
         .btn-l1 { border-color: var(--cyan); color: var(--cyan); }
         .btn-l2 { border-color: var(--purple); color: var(--purple); }
         .btn-l3 { border-color: var(--orange); color: var(--orange); }
         .btn-l4 { border-color: var(--gold); color: var(--gold); }
-        .timer-big { font-size: 140px; font-weight: 900; color: var(--cyan); text-shadow: 0 0 30px var(--cyan); font-family: monospace; }
-        .timer-urgent { color: var(--red) !important; text-shadow: 0 0 30px var(--red) !important; animation: blink 0.5s infinite; }
-        .q-text { font-size: 60px; font-weight: bold; margin: 40px 0; text-align: center; }
-        .opt-btn { width: 85%; padding: 25px; margin-bottom: 20px; font-size: 50px; border-radius: 15px; border: 3px solid var(--cyan); background: rgba(0, 242, 255, 0.05); color: #fff; cursor: pointer; font-weight: bold; transition: 0.2s; }
+
+        .timer-big { font-size: 130px; font-weight: 900; color: var(--cyan); text-shadow: 0 0 30px var(--cyan); font-family: monospace; }
+        .timer-urgent { color: var(--red) !important; animation: blink 0.5s infinite; }
+        
+        .q-text { font-size: 55px; font-weight: bold; margin: 30px 0; text-align: center; }
+        
+        .opt-btn { 
+            width: 85%; padding: 22px; margin-bottom: 15px; font-size: 45px; border-radius: 15px; 
+            border: 3px solid var(--cyan); background: rgba(0, 242, 255, 0.05); color: #fff; cursor: pointer; font-weight: bold; transition: 0.2s;
+        }
         .opt-correct { background: var(--green) !important; color: #000; border-color: var(--green) !important; box-shadow: 0 0 60px var(--green); }
         .opt-wrong { background: var(--red) !important; color: #fff; border-color: var(--red) !important; animation: shake 0.4s; }
-        .expl-panel { width: 90%; font-size: 40px; padding: 25px 45px; border-radius: 20px; margin-top: 15px; border: 4px solid; line-height: 1.5; background: rgba(0,0,0,0.8); }
+
+        .expl-panel { width: 90%; font-size: 38px; padding: 25px 40px; border-radius: 20px; margin-top: 15px; border: 4px solid; line-height: 1.5; background: rgba(0,0,0,0.8); }
         .expl-ok { border-color: var(--green); color: var(--green); }
         .expl-fail { border-color: var(--red); color: var(--red); }
+
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-20px); } 40%, 80% { transform: translateX(20px); } }
-        .score-hero { font-size: 260px; color: var(--gold); font-weight: 900; text-shadow: 0 0 80px var(--gold); }
+        .score-hero { font-size: 250px; color: var(--gold); font-weight: 900; text-shadow: 0 0 80px var(--gold); }
     </style>
 </head>
 <body>
-<div class="hud-border" id="app"></div>
+    <div class="hud-border" id="app"></div>
+
 <script>
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function synth(freq, type, duration, vol, delay=0) {
+    // --- 數位音效引擎 ---
+    let audioCtx;
+    function initAudio() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function synth(freq, type, duration, vol, delay = 0) {
+        if (!audioCtx) return;
         setTimeout(() => {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-            osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
             gain.gain.setValueAtTime(vol, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
             osc.connect(gain); gain.connect(audioCtx.destination);
             osc.start(); osc.stop(audioCtx.currentTime + duration);
         }, delay);
     }
+
     const SFX = {
-        // 強化版：高頻快節奏叮咚 (激勵感)
-        dingdong: () => { 
-            synth(1046, 'sine', 0.2, 0.3); // C6
-            synth(1318, 'sine', 0.2, 0.3, 80); // E6
-            synth(1567, 'sine', 0.3, 0.3, 160); // G6
+        ding: () => { // 激勵感高頻連音
+            synth(1100, 'sine', 0.2, 0.3); synth(1400, 'sine', 0.2, 0.3, 70); synth(1700, 'sine', 0.3, 0.3, 140);
         },
-        babuu: () => { 
-            synth(233, 'sawtooth', 0.6, 0.4); synth(233, 'sawtooth', 0.5, 0.2, 50);
-            setTimeout(() => { synth(174, 'sawtooth', 0.8, 0.4); synth(174, 'sawtooth', 0.7, 0.2, 50); }, 300);
+        fail: () => { // 震撼叭哺聲
+            synth(230, 'sawtooth', 0.6, 0.4); synth(170, 'sawtooth', 0.8, 0.4, 250);
         },
-        win: () => { [523, 659, 783, 1046, 1318, 1567].forEach((f, i) => synth(f, 'sine', 0.8, 0.1, i * 120)); }
+        win: () => { [523, 659, 783, 1046, 1318, 1567].forEach((f, i) => synth(f, 'sine', 0.8, 0.1, i * 150)); }
     };
 
+    // --- 完整題庫 ---
     const rawData = [
         ["三顧茅廬","拜訪名師，誠心求才。","走馬看花，隨便觀察。","劉備三次拜訪諸葛亮，形容求才誠意。",1],
         ["半途而廢","事情停擺，意志不堅。","堅持不懈，努力到底。","事情做一半就停止，形容意志不堅。",1],
         ["完璧歸趙","完好帶回，歸還原主。","貪心佔有，據為己有。","藺相如將和氏璧完好帶回趙國。",1],
         ["對牛彈琴","白費唇舌，道理深奧。","循循善誘，引導學生。","比喻對不講理或不懂的人白費唇舌。",2],
         ["視若無睹","看見卻不理，當沒看到。","認真觀察，分辨色彩。","雖然常看到，卻像沒看到一樣不加理會。",3],
-        ["罄竹難書","罪大惡極，寫不完數。","功德無量，善行眾多。","用盡所有竹簡也寫不完其罪狀。",4],
+        ["罄竹難書","罪大惡極，寫不完數。","功德無量，善行眾多。","形容罪惡多得寫不完。",4],
+        ["邯鄲學步","喪失自我，亂學他人。","表現傑出，青出於藍。","燕國人學邯鄲人走路，最後爬著回家。",3],
         ["未雨綢繆","預先防範，做好準備。","臨渴掘井，臨時湊合。","天還沒下雨就先修房子，比喻先預防。",3],
         ["鳳毛麟角","珍貴稀少，優秀人才。","凡夫俗子，平庸之輩。","比喻稀罕珍貴的人才或事物。",4],
         ["披荊斬棘","勇敢前進，不畏艱難。","畏縮不前，畏首畏尾。","撥開荊棘前進，比喻克服困難。",1],
         ["韜光養晦","收斂光芒，隱藏實力。","炫耀才華，鋒芒畢露。","收斂光芒，不輕易顯露才華。",2]
-        // (題庫依照等級規則調用)
     ];
 
-    let lv = 1, score = 0, qIdx = 0, timeLeft = 10, timerId = null, quizSet = [], currentMax = 10, state = "lobby";
+    let lv = 1, score = 0, qIdx = 0, timeLeft = 10, timerId = null, quizSet = [], currentMax = 10;
     const app = document.getElementById('app');
     const lvMap = { 1: "執行特工", 2: "資深特派", 3: "王牌特攻", 4: "特級首席" };
 
+    const iconSVG = {
+        l1: `<svg class="lv-svg" viewBox="0 0 24 24"><path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/></svg>`,
+        l2: `<svg class="lv-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2l2 8h8l-6 5 2 8-6-5-6 5 2-8-6-5h8z"/></svg>`,
+        l3: `<svg class="lv-svg" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="4"/></svg>`,
+        l4: `<svg class="lv-svg" viewBox="0 0 24 24"><path d="M12 2l2.4 7.2h7.6l-6 4.8 2.4 7.2-6-4.8-6 4.8 2.4-7.2-6-4.8h7.6z"/></svg>`
+    };
+
     function showLobby() {
-        state = "lobby"; if(timerId) clearInterval(timerId);
+        if (timerId) clearInterval(timerId);
         app.innerHTML = `
-            <div style="font-size:90px; margin-top:20px;">🦅</div>
+            <div style="font-size:80px; margin-top:10px;">🦅</div>
             <div class="main-title">成語特工：航太終端</div>
+            <div style="font-size:32px; color:var(--cyan); margin-bottom:30px;">請選擇職銜職位啟動評定</div>
             <div class="level-grid">
-                <div class="level-btn btn-l1" onclick="start(1)"><svg class="lv-svg" viewBox="0 0 24 24"><path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12s9-6.45 9-12V7l-9-5z"/></svg><div class="lv-tag">${lvMap[1]}</div></div>
-                <div class="level-btn btn-l2" onclick="start(2)"><svg class="lv-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2l2 8h8l-6 5 2 8-6-5-6 5 2-8-6-5h8z"/></svg><div class="lv-tag">${lvMap[2]}</div></div>
-                <div class="level-btn btn-l3" onclick="start(3)"><svg class="lv-svg" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="4"/></svg><div class="lv-tag">${lvMap[3]}</div></div>
-                <div class="level-btn btn-l4" onclick="start(4)"><svg class="lv-svg" viewBox="0 0 24 24"><path d="M12 2l2.4 7.2h7.6l-6 4.8 2.4 7.2-6-4.8-6 4.8 2.4-7.2-6-4.8h7.6z"/></svg><div class="lv-tag">${lvMap[4]}</div></div>
+                <div class="level-btn btn-l1" onclick="startTask(1)">${iconSVG.l1}<div class="lv-tag">${lvMap[1]}</div></div>
+                <div class="level-btn btn-l2" onclick="startTask(2)">${iconSVG.l2}<div class="lv-tag">${lvMap[2]}</div></div>
+                <div class="level-btn btn-l3" onclick="startTask(3)">${iconSVG.l3}<div class="lv-tag">${lvMap[3]}</div></div>
+                <div class="level-btn btn-l4" onclick="startTask(4)">${iconSVG.l4}<div class="lv-tag">${lvMap[4]}</div></div>
             </div>
         `;
     }
 
-    function start(n, fast = false) {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        lv = n; score = 0; qIdx = 0; state = "quiz";
-        currentMax = fast ? 7 : 10;
+    function startTask(n, fast = false) {
+        initAudio();
+        lv = n; score = 0; qIdx = 0; currentMax = fast ? 7 : 10;
         quizSet = rawData.filter(d => d[4] === n).sort(() => Math.random() - 0.5).slice(0, 10);
-        run();
+        if (quizSet.length < 5) quizSet = rawData.sort(() => Math.random() - 0.5).slice(0, 10);
+        renderQuiz();
     }
 
-    function run() {
-        if (qIdx >= quizSet.length) { finish(); return; }
+    function renderQuiz() {
+        if (qIdx >= quizSet.length) { finishTask(); return; }
         if (timerId) clearInterval(timerId);
+
         timeLeft = currentMax;
         let d = quizSet[qIdx];
-        let options = [{text: d[1], isCorrect: true}, {text: d[2], isCorrect: false}].sort(() => Math.random() - 0.5);
+        let options = [{t: d[1], c: true}, {t: d[2], c: false}].sort(() => Math.random() - 0.5);
+
         app.innerHTML = `
-            <div style="width:100%; display:flex; justify-content:space-between; align-items:center; padding:0 30px; box-sizing:border-box;">
+            <div style="width:100%; display:flex; justify-content:space-between; padding:0 30px; box-sizing:border-box;">
                 <span style="font-size:32px; color:var(--cyan)">${lvMap[lv]}</span>
                 <div class="timer-big" id="t">${timeLeft}</div>
-                <span style="font-size:32px; color:var(--cyan)">TASK: ${qIdx+1}/10</span>
+                <span style="font-size:32px; color:var(--cyan)">任務: ${qIdx+1}/10</span>
             </div>
             <div class="q-text">「${d[0]}」的意思是？</div>
-            <button class="opt-btn" id="opt0" onclick="check(0, ${options[0].isCorrect})">${options[0].text}</button>
-            <button class="opt-btn" id="opt1" onclick="check(1, ${options[1].isCorrect})">${options[1].text}</button>
+            <button class="opt-btn" id="opt0" onclick="judge(0, ${options[0].c})">${options[0].t}</button>
+            <button class="opt-btn" id="opt1" onclick="judge(1, ${options[1].c})">${options[1].t}</button>
             <div id="expl-area"></div>
         `;
+
         timerId = setInterval(() => {
             timeLeft--;
             const tEl = document.getElementById('t');
-            if (tEl) { tEl.innerText = timeLeft; if (timeLeft <= 3) tEl.className = "timer-big timer-urgent"; }
-            if (timeLeft <= 0) { clearInterval(timerId); check(-1, false, true); }
+            if (tEl) {
+                tEl.innerText = timeLeft;
+                if (timeLeft <= 3) tEl.className = "timer-big timer-urgent";
+            }
+            if (timeLeft <= 0) {
+                clearInterval(timerId);
+                judge(-1, false, true); // 觸發超時
+            }
         }, 1000);
     }
 
-    function check(idx, isCorrect, isTimeout = false) {
-        if (timerId) { clearInterval(timerId); timerId = null; }
+    function judge(idx, isCorrect, isTimeout = false) {
+        if (timerId) clearInterval(timerId);
+        
         const d = quizSet[qIdx];
-        const explArea = document.getElementById('expl-area');
-        const btn0 = document.getElementById('opt0'), btn1 = document.getElementById('opt1');
-        btn0.onclick = null; btn1.onclick = null;
+        const area = document.getElementById('expl-area');
+        const b0 = document.getElementById('opt0'), b1 = document.getElementById('opt1');
+        b0.onclick = null; b1.onclick = null;
+
         if (isCorrect && !isTimeout) {
-            score += 100; SFX.dingdong();
+            score += 100; SFX.ding();
             document.getElementById('opt' + idx).classList.add('opt-correct');
-            explArea.innerHTML = `<div class="expl-panel expl-ok">⭐ 通訊成功：${d[3]}</div>`;
+            area.innerHTML = `<div class="expl-panel expl-ok">⭐ 通訊正確：${d[3]}</div>`;
         } else {
-            SFX.babuu();
-            if(!isTimeout && idx !== -1) document.getElementById('opt' + idx).classList.add('opt-wrong');
-            if(btn0.innerText === d[1]) btn0.classList.add('opt-correct'); else btn1.classList.add('opt-correct');
-            const msg = isTimeout ? "⌛ 逾時判定：任務失效。" : "❌ 攔截警報：詳解分析";
-            explArea.innerHTML = `<div class="expl-panel expl-fail">${msg}<br>${d[3]}</div>`;
+            SFX.fail();
+            if (!isTimeout) document.getElementById('opt' + idx).classList.add('opt-wrong');
+            // 標示正確項
+            if (b0.innerText === d[1]) b0.classList.add('opt-correct');
+            else b1.classList.add('opt-correct');
+
+            const msg = isTimeout ? "⌛ 通訊超時：計算失敗。" : "❌ 攔截警報：";
+            area.innerHTML = `<div class="expl-panel expl-fail">${msg}<br>${d[3]}</div>`;
             app.animate([{transform:'translateX(-25px)'},{transform:'translateX(25px)'},{transform:'translateX(0)'}], {duration:100, iterations:4});
         }
-        qIdx++; setTimeout(run, 3000);
+
+        qIdx++;
+        setTimeout(renderQuiz, 3000);
     }
 
-    function finish() {
+    function finishTask() {
         if (score >= 800) {
-            SFX.win(); let end = Date.now() + 4000;
-            (function frame() { confetti({ particleCount: 25, spread: 100, origin: { y: 0.6 } }); if (Date.now() < end) requestAnimationFrame(frame); }());
+            SFX.win();
+            let end = Date.now() + 4000;
+            (function f() { confetti({ particleCount: 25, spread: 80, origin: { y: 0.6 } }); if (Date.now() < end) requestAnimationFrame(f); })();
             app.innerHTML = `
                 <div class="main-title" style="color:var(--gold)">評定成功！</div>
                 <div class="score-hero">${score}</div>
-                <button class="opt-btn" style="width:65%; border-color:var(--gold); color:var(--gold)" onclick="start(lv, true)">⚡ 原職加速挑戰 (7秒)</button>
-                <button class="opt-btn" style="width:65%" onclick
+                <div style="font-size:40px; margin-bottom:30px;">恭喜！達成特工評定目標。</div>
+                <button class="opt-btn" style="width:60%; border-color:var(--gold); color:var(--gold)" onclick="startTask(lv, true)">⚡ 挑戰原職：加速版 (7秒)</button>
+                <button class="opt-btn" style="width:60%" onclick="showLobby()">⭐ 返回基地晉升職銜</button>
+            `;
+        } else {
+            SFX.fail();
+            app.innerHTML = `<div class="main-title" style="color:var(--red)">評定未通過</div><div class="score-hero" style="color:var(--red)">${score}</div><button class="opt-btn" style="width:60%" onclick="showLobby()">重新受訓</button>`;
+        }
+    }
+
+    showLobby();
+</script>
+</body>
+</html>
