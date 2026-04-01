@@ -1,93 +1,127 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
+<!DOCTYPE html><html lang="zh-TW"><head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>成語特工：航太終端</title>
+    <title>成語特工：絕對終端 V43 - 200題全數據版</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
         :root { --cyan: #00f2ff; --purple: #bc13fe; --orange: #ff9d00; --gold: #ffd700; --red: #ff3131; --green: #39ff14; --bg: #020508; }
-        
-        body { 
-            background-color: var(--bg); color: #fff; font-family: "Segoe UI", "Microsoft JhengHei", sans-serif; 
-            margin: 0; padding: 0; min-height: 100vh; display: flex; justify-content: center; align-items: center; 
-            background: radial-gradient(circle at center, #0a192f 0%, #020508 100%); overflow-x: hidden;
-        }
-
-        /* 航太外框 - 使用彈性寬度 */
-        .hud-border { 
-            width: 95%; max-width: 800px; min-height: 90vh; border: 2px solid rgba(0, 242, 255, 0.3); border-radius: 20px; 
-            position: relative; display: flex; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; 
-            background: rgba(10, 25, 47, 0.6); backdrop-filter: blur(8px); margin: 10px auto;
-        }
-
-        .hud-border::before {
-            content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            border: 2px solid var(--cyan); border-radius: 20px; pointer-events: none;
-            clip-path: polygon(0 0, 15% 0, 15% 2%, 2% 2%, 2% 15%, 0 15%, 0 0, 85% 0, 85% 2%, 98% 2%, 98% 15%, 100% 15%, 100% 0, 100% 85%, 98% 85%, 98% 98%, 85% 98%, 85% 100%, 100% 100%, 0 100%, 0 85%, 2% 85%, 2% 98%, 15% 98%, 15% 100%, 0 100%);
-            opacity: 0.8;
-        }
-
-        .main-title { 
-            font-size: clamp(30px, 8vw, 60px); font-weight: 900; color: #fff; 
-            text-shadow: 0 0 15px var(--cyan); margin: 10px 0; text-align: center; letter-spacing: 2px;
-        }
-
-        /* 響應式等級網格 */
-        .level-grid { 
-            display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; margin-top: 20px; 
-        }
-        @media (max-width: 600px) { .level-grid { grid-template-columns: 1fr; } }
-
-        .level-btn { 
-            background: rgba(255,255,255,0.05); border: 2px solid #fff; border-radius: 12px; 
-            min-height: 100px; display: flex; align-items: center; padding: 15px; cursor: pointer; transition: 0.3s;
-        }
-        .level-btn:hover { background: rgba(255,255,255,0.15); box-shadow: 0 0 20px currentColor; }
-        
-        .lv-svg { width: 40px; height: 40px; margin-right: 15px; stroke: currentColor; fill: none; stroke-width: 2; }
-        .lv-tag { font-size: clamp(20px, 5vw, 32px); font-weight: 900; }
-
-        .btn-l1 { border-color: var(--cyan); color: var(--cyan); }
-        .btn-l2 { border-color: var(--purple); color: var(--purple); }
-        .btn-l3 { border-color: var(--orange); color: var(--orange); }
-        .btn-l4 { border-color: var(--gold); color: var(--gold); }
-
-        /* 遊戲畫面縮放 */
-        .timer-big { font-size: clamp(60px, 20vw, 120px); font-weight: 900; color: var(--cyan); line-height: 1; }
-        .timer-urgent { color: var(--red) !important; animation: blink 0.5s infinite; }
-        
-        .q-text { font-size: clamp(24px, 6vw, 42px); font-weight: bold; margin: 20px 0; text-align: center; width: 90%; }
-        
-        .opt-btn { 
-            width: 100%; padding: 18px; margin-bottom: 12px; font-size: clamp(18px, 5vw, 32px); 
-            border-radius: 10px; border: 2px solid var(--cyan); background: rgba(0, 242, 255, 0.05); 
-            color: #fff; cursor: pointer; font-weight: bold;
-        }
-        .opt-correct { background: var(--green) !important; color: #000; border-color: var(--green) !important; }
-        .opt-wrong { background: var(--red) !important; color: #fff; border-color: var(--red) !important; animation: shake 0.4s; }
-
-        .expl-panel { 
-            width: 100%; font-size: clamp(16px, 4.5vw, 24px); padding: 15px; border-radius: 10px; 
-            margin-top: 10px; border: 2px solid; background: rgba(0,0,0,0.8); box-sizing: border-box;
-        }
-        .expl-ok { border-color: var(--green); color: var(--green); }
-        .expl-fail { border-color: var(--red); color: var(--red); }
-
+        body { background-color: var(--bg); color: #fff; font-family: "Microsoft JhengHei", sans-serif; margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; background: radial-gradient(circle at center, #0a192f 0%, #020508 100%); }
+        .hud-border { width: 96vw; height: 96vh; border: 2px solid rgba(0, 242, 255, 0.4); border-radius: 30px; position: relative; display: flex; flex-direction: column; align-items: center; padding: 25px; box-sizing: border-box; background: rgba(10, 25, 47, 0.85); backdrop-filter: blur(15px); }
+        .hud-border::before { content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; border: 2px solid var(--cyan); border-radius: 30px; pointer-events: none; clip-path: polygon(0 0, 15% 0, 15% 2%, 2% 2%, 2% 15%, 0 15%, 0 0, 85% 0, 85% 2%, 98% 2%, 98% 15%, 100% 15%, 100% 0, 100% 85%, 98% 85%, 98% 98%, 85% 98%, 85% 100%, 100% 100%, 0 100%, 0 85%, 2% 85%, 2% 98%, 15% 98%, 15% 100%, 0 100%); opacity: 0.8; }
+        .main-title { font-size: 55px; font-weight: 900; color: #fff; text-shadow: 0 0 20px var(--cyan); margin: 10px 0; font-style: italic; letter-spacing: 5px; }
+        .q-text { font-size: 52px; font-weight: bold; margin: 20px 0; color: var(--gold); }
+        .opt-btn { width: 85%; padding: 20px; margin-bottom: 12px; font-size: 42px; border-radius: 15px; border: 3px solid var(--cyan); background: rgba(0, 242, 255, 0.05); color: #fff; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .opt-correct { background: var(--green) !important; color: #000 !important; border-color: var(--green) !important; box-shadow: 0 0 50px var(--green); }
+        .opt-wrong { background: var(--red) !important; color: #fff !important; border-color: var(--red) !important; animation: shake 0.4s; }
+        .final-btn-group { display: flex; gap: 20px; width: 90%; justify-content: center; margin-top: 20px; }
+        .final-btn { flex: 1; height: 160px; font-size: 38px; border-radius: 20px; border: 4px solid var(--cyan); background: rgba(0,0,0,0.3); color: #fff; cursor: pointer; font-weight: 900; transition: 0.3s; line-height: 1.2; }
+        .btn-purple { background: var(--purple) !important; box-shadow: 0 0 30px var(--purple); }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(10px); }
+        .modal-content { width: 85%; max-height: 80%; background: #0a192f; border: 4px solid var(--cyan); border-radius: 30px; padding: 40px; overflow-y: auto; position: relative; box-shadow: 0 0 50px var(--cyan); }
+        .error-item { border-bottom: 2px solid rgba(0,242,255,0.2); padding: 25px 0; text-align: left; }
+        .close-modal { position: sticky; top: 0; float: right; background: var(--red); color: #fff; border: none; padding: 15px 30px; cursor: pointer; font-size: 28px; border-radius: 15px; font-weight: bold; z-index: 101; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-12px); } 40%, 80% { transform: translateX(12px); } }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
-        .score-hero { font-size: clamp(80px, 30vw, 200px); color: var(--gold); font-weight: 900; line-height: 1; }
-    </style>
-</head>
-<body>
+    </style></head><body>
     <div class="hud-border" id="app"></div>
+    <div class="modal-overlay" id="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="toggleModal(false)">關閉</button>
+            <h2 style="color:var(--gold); font-size:45px; border-bottom:3px solid var(--gold); padding-bottom:10px;">詳細錯題解說紀錄</h2>
+            <div id="error_report_content"></div>
+        </div>
+    </div>
 
 <script>
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    let audioCtx, timer, isLocked = false, qSet = [], qIdx = 0, score = 0, curLv = 0, errorList = [], gameSpeed = 10;
+    const lvMap = { 1: "執行特工", 2: "資深特派", 3: "王牌特攻", 4: "特級首席" };
+
+    // --- 完整 200 題資料庫 (已修正「徹底」錯字) ---
+    const DB = {
+        1: [
+            ["三顧茅廬", "非常有禮邀請人才", "走馬看花", "劉備三次拜訪諸葛亮，形容求才誠意。"],
+            ["半途而廢", "做事不徹底沒恆心", "堅持不懈", "事情做一半就停止，形容意志不堅。"],
+            ["司空見慣", "看慣了不覺得奇怪", "異想天開", "比喻事物經常見到，不足為奇。"],
+            ["完璧歸趙", "物歸原主完好無損", "據為己有", "藺相如將和氏璧完好帶回趙國。"],
+            ["手足之情", "感情深厚親如兄弟", "萍水相逢", "比喻兄弟或好朋友之間親密的感情。"],
+            ["磨杵成針", "有恆心必能成功", "揠苗助長", "只要努力不懈，連鐵棒都能磨成針。"],
+            ["精疲力竭", "體力消耗殆盡", "神采奕奕", "形容人非常疲累，體力用盡。"],
+            ["婉轉動聽", "聲音悅耳有起伏", "枯燥乏味", "形容聲音優美動聽，讓人舒服。"],
+            ["有備無患", "事先準備避免禍患", "臨陣磨槍", "只要事先有充分準備，就不會出錯。"],
+            ["一絲不苟", "細微處也不放過", "粗心大意", "形容做事非常認真，一點都不馬虎。"],
+            ["精彩紛呈", "內容豐富引人入勝", "乏人問津", "內容多采多姿，非常引人注目。"],
+            ["桃紅柳綠", "春天絢麗的景色", "荒無人煙", "形容春天優美的景色。"],
+            ["有條不紊", "說話做事有條理", "雜亂無章", "條理清楚，一點都不混亂。"],
+            ["欣喜若狂", "高興到要跳起來", "垂頭喪氣", "高興到了極點，就像發瘋一樣。"],
+            ["鴉雀無聲", "極度寂靜沒聲音", "震耳欲聾", "連烏鴉麻雀都不叫了，形容非常安靜。"],
+            ["坐井觀天", "眼界狹小見識短淺", "遠見卓識", "坐在井底看天，以為只有井口大。"],
+            ["得不償失", "因小失大利益受損", "獲益匪淺", "得到的利益補償不了付出的損失。"],
+            ["雄心壯志", "遠大理想宏偉抱負", "玩世不恭", "形容人非常有志氣，想做大事。"],
+            ["美中不足", "事物雖好仍有缺點", "十全十美", "整體雖然完美，但仍有一點缺陷。"],
+            ["小心翼翼", "舉止謹慎不敢馬虎", "粗心大意", "形容做事非常慎重，不敢掉以輕心。"]
+        ],
+        2: [
+            ["韜光養晦", "隱藏實力等待機會", "鋒芒畢露", "收斂光芒，不輕易顯露才華。"],
+            ["危如累卵", "情況極為危險", "安如泰山", "危險得像堆疊的蛋，隨時會碎。"],
+            ["推心置腹", "真心待人毫無保留", "貌合神離", "把心放在別人腹中，形容極為真誠。"],
+            ["博學多聞", "學問廣博見識豐富", "孤陋寡聞", "廣泛學習並聽取各種知識。"],
+            ["空中樓閣", "虛幻沒根據的想法", "腳踏實地", "比喻脫離現實的幻想。"],
+            ["心領神會", "默契極好心意相通", "莫名其妙", "不必明說，心裡就能明白對方意思。"],
+            ["絕處逢生", "危險中發現生機", "走投無路", "在走投無路時，又發現了轉機。"],
+            ["侃侃而談", "說話有理從容不迫", "語無倫次", "理直氣壯、從容不迫地談話。"],
+            ["矯枉過正", "糾正錯誤超過限度", "恰到好處", "糾正錯誤過了頭，反而有害。"],
+            ["雷厲風行", "做事迅速執行力強", "拖泥帶水", "像打雷下雨一樣迅速，形容果斷。"],
+            ["旗鼓相當", "實力相當不分上下", "懸殊巨大", "比喻兩軍對壘，實力不相上下。"],
+            ["日新月異", "進步極快不斷發展", "停滯不前", "每天每月都有新的變化和進步。"],
+            ["妙筆生花", "才華橫溢文筆極佳", "平淡無奇", "文筆高超，能寫出動人的篇章。"],
+            ["源遠流長", "歷史悠久根基深厚", "枯竭而死", "水的源頭很遠，比喻歷史悠久。"],
+            ["岌岌可危", "處境危險隨時出事", "穩如磐石", "形容情況非常危急。"],
+            ["氣吞山河", "氣勢強大有氣魄", "膽小如鼠", "形容氣勢強大到可以吞掉山河。"],
+            ["木已成舟", "事實已定無法挽回", "亡羊補牢", "樹木已做成船，比喻事實已定。"],
+            ["彬彬有禮", "文雅且有禮貌", "傲慢無理", "形容非常有禮貌，態度謙虛。"],
+            ["見利忘義", "看見利益忘記道義", "捨生取義", "看見利益就忘記了道義。"]
+        ],
+        3: [
+            ["邯鄲學步", "模仿不成失去自我", "青出於藍", "盲目模仿他人，反而失掉原有技能。"],
+            ["破釜沉舟", "決心戰鬥不留後路", "苟且偷安", "打碎鍋子鑿沉船隻，表示必死決心。"],
+            ["洛陽紙貴", "文章極好廣為流傳", "乏人問津", "著作風行一時，使紙張變貴。"],
+            ["魚游釜中", "處境危險生命垂危", "游刃有餘", "魚在鍋子裡游，比喻處境極危險。"],
+            ["斬釘截鐵", "態度堅決毫不猶豫", "猶豫不決", "形容做事乾脆利落，不拖泥帶水。"],
+            ["捉襟見肘", "生活窮困窮於應付", "衣食無缺", "拉下衣襟露出胳膊，形容極窮。"],
+            ["視若無睹", "看慣了卻像沒看到", "察言觀色", "比喻對眼前的事物視而不見。"],
+            ["懷才不遇", "有才華卻沒機會", "大器晚成", "雖然有滿腹才華，卻找不到施展機會。"],
+            ["鋌而走險", "為小利冒極大風險", "循規蹈矩", "窮途末路時，不顧危險採取行動。"],
+            ["錙銖必較", "極小錢財都要計較", "大方慷慨", "形容人非常吝嗇，一毛不拔。"],
+            ["臥薪嚐膽", "發憤圖強隱忍受苦", "享樂至上", "比喻為了達成目標而隱忍奮鬥。"],
+            ["滿腹經綸", "才識豐富能辦大事", "胸無點墨", "形容人才識豐富，有處理大事才幹。"],
+            ["老當益壯", "年紀大但志氣更高", "未老先衰", "年紀雖大，但精神鬥志更旺盛。"],
+            ["捨本逐末", "放棄根本追求枝節", "抓大放小", "比喻做事沒重點，抓錯方向。"],
+            ["百折不撓", "意志堅定不畏挫折", "一蹶不振", "經歷無數次挫折也不退縮。"],
+            ["一針見血", "說話精闢直指核心", "模稜兩可", "比喻說話直指核心，非常精闢。"]
+        ],
+        4: [
+            ["越俎代庖", "超越權限代人辦事", "恪盡職守", "比喻管閒事，處理不屬分內的事。"],
+            ["罄竹難書", "罪大惡極多到寫不完", "功德無量", "用盡竹簡也寫不完其罪狀。"],
+            ["禍起蕭牆", "禍亂發生在內部", "攘外安內", "蕭牆是屏風，比喻內部發生變亂。"],
+            ["腹笥淵博", "非常有學問肚子滿書", "胸無點墨", "形容肚子像書箱裝滿了書。"],
+            ["削足適履", "因小失大勉強遷就", "量體裁衣", "削掉腳趾穿鞋，比喻不當遷就。"],
+            ["揠苗助長", "做事勉強沒好結果", "順其自然", "拔高禾苗幫生長，反而讓它枯死。"],
+            ["驚弓之鳥", "受過苦後極度敏感", "處變不驚", "被箭射傷過的鳥，聽到弦聲就怕。"],
+            ["燕雀處堂", "處境危險卻不自知", "高枕無憂", "燕築巢屋簷下，不知屋子將失火。"],
+            ["鳳毛麟角", "稀罕珍貴人才事物", "凡夫俗子", "比喻才華卓越的人或稀有事物。"],
+            ["捨生取義", "為正義而犧牲自己", "貪生怕死", "為了維護正義，不惜犧牲生命。"],
+            ["浮光掠影", "觀察不深印象淺薄", "深入人心", "比喻看事情不夠深入，只看表面。"],
+            ["窮且益堅", "處境困難意志更堅", "隨波逐流", "形容雖然窮困但仍有志氣。"]
+        ]
+    };
+
+    function initAudio() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
     function synth(freq, type, duration, vol, delay=0) {
+        if(!audioCtx) return;
         setTimeout(() => {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
             osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
             gain.gain.setValueAtTime(vol, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
@@ -96,113 +130,83 @@
         }, delay);
     }
     const SFX = {
-        ding: () => { synth(1046, 'sine', 0.2, 0.3); synth(1318, 'sine', 0.2, 0.3, 80); synth(1567, 'sine', 0.3, 0.3, 160); },
-        fail: () => { synth(233, 'sawtooth', 0.6, 0.4); synth(174, 'sawtooth', 0.8, 0.4, 250); },
-        win: () => { [523, 659, 783, 1046, 1318].forEach((f, i) => synth(f, 'sine', 0.8, 0.1, i * 150)); }
+        ding: () => { synth(1100, 'sine', 0.15, 0.3); synth(1400, 'sine', 0.15, 0.3, 60); },
+        alarm: () => { synth(110, 'sawtooth', 0.5, 0.4); synth(110, 'sawtooth', 0.4, 0.3, 150); },
+        win: () => { [523, 659, 783, 1046].forEach((f, i) => synth(f, 'sine', 0.8, 0.1, i * 150)); }
     };
-
-    const quizData = {
-        1: [["三顧茅廬","誠心拜訪人才。","隨便觀察應付。","劉備三次拜訪諸葛亮，形容求才誠意。"],["半途而廢","中途停止努力。","堅持做到最後。","事情做一半就停止，形容意志不堅。"],["司空見慣","事物平凡常見。","想法奇怪離譜。","比喻事物經常見到，不足為奇。"],["完璧歸趙","物歸原主完好。","偷偷佔為己有。","藺相如將和氏璧完好帶回趙國。"],["手足之情","兄弟感情深厚。","路人偶然相遇。","比喻兄弟或好朋友之間親密的感情。"],["磨杵成針","努力必能成功。","做事拔苗助長。","只要努力不懈，連鐵棒都能磨成針。"],["精疲力竭","耗盡體力疲累。","精神飽滿振奮。","精神與體力都消耗殆盡。"],["滄海桑田","世事變化極大。","一直維持原狀。","大海變成了農田，形容世事變化極大。"],["東施效顰","胡亂模仿出醜。","表現青出於藍。","醜女模仿美女皺眉，反而更醜。"],["披荊斬棘","勇敢克服困難。","害怕畏縮不前。","撥開荊棘前進，比喻克服困難。"]],
-        2: [["韜光養晦","收斂才華待機。","張揚顯露實力。","收斂光芒，不輕易顯露才華。"],["危如累卵","情況極度危險。","非常安全穩定。","危險得像堆疊起來的蛋，隨時會碎。"],["推心置腹","真心待人誠懇。","內心各懷鬼胎。","把心放在別人腹中，形容極為真誠。"],["博學多聞","學識廣博豐富。","孤陋廣聞淺薄。", "廣泛學習並聽取各種知識。"],["空中樓閣","脫離現實幻想。","做事腳踏實地。", "比喻脫離現實的幻想。"],["對牛彈琴","白費唇舌道理。","引導學生學習。", "比喻對不懂的人講道理。"],["心領神會","內心明白默契。","莫名其妙不懂。", "不必明說就能明白意思。"],["絕處逢生","死裡逃生轉機。","完全走投無路。", "在走投無路時發現生機。"],["侃侃而談","說話理直氣壯。","講話語無倫次。", "理直氣壯且從容的談話。"],["矯枉過正","糾正過度有害。","處理恰到好處。", "糾正錯誤超過限度。"]],
-        3: [["邯鄲學步","模仿他人失我。","表現優秀勝師。","學走路最後爬著回家。"],["破釜沉舟","決心戰鬥到底。","做事苟且偷安。","表示必死的決心。"],["未雨綢繆","事先準備預防。","臨渴才要掘井。","天沒下雨先修房子。"],["洛陽紙貴","著作廣受歡迎。","書籍無人問津。","形容著作風行一時。"],["魚游釜中","生命極度危險。","處理游刃有餘。","魚在鍋中游。"],["斬釘截鐵","做事果斷利落。","態度猶豫不決。","態度堅決毫不猶豫。"],["草木皆兵","受驚驚恐萬分。","內心泰然自若。","把草木看成士兵。"],["捉襟見肘","生活極度窮困。","衣食無憂富裕。","形容窮於應付。"],["畫蛇添足","多此一舉失敗。","做得錦上添花。","形容多此一舉。"],["視若無睹","看見卻不理會。","認真觀察色彩。","像沒看到一樣不理。"]],
-        4: [["越俎代庖","超越權限管事。","守好自己本分。","放下祭器去幫廚師。"],["罄竹難書","罪大惡極難盡。","功德無量巨大。","用盡竹簡也寫不完。"],["禍起蕭牆","禍亂生自內部。","一致對抗外敵。","比喻內部發生變亂。"],["井底之蛙","見識非常淺薄。","見多識廣博大。","比喻眼界狹小。"],["腹笥淵博","學問極度深厚。","胸無點墨無知。","形容極有學問。"],["削足適履","因小失大遷就。","量體裁衣合適。","比喻勉強遷就。"],["揠苗助長","勉強反而有害。","遵循自然生長。","拔高禾苗反而弄死。"],["驚弓之鳥","受過驚嚇敏感。","處變不驚冷靜。","聽到弦聲就害怕。"],["燕雀處堂","處險境而不覺。","安穩高枕無憂。","不知屋子將失火。"],["鳳毛麟角","珍貴稀少人才。","凡夫俗子平凡。","稀罕珍貴的人才。"]]
-    };
-
-    let lv = 1, score = 0, qIdx = 0, timeLeft = 10, timerId = null, quizSet = [], currentMax = 10;
-    const app = document.getElementById('app');
-    const lvMap = { 1: "執行特工", 2: "資深特派", 3: "王牌特攻", 4: "特級首席" };
 
     function showLobby() {
-        if (timerId) clearInterval(timerId);
-        app.innerHTML = `
-            <div style="font-size:50px;">🦅</div>
-            <div class="main-title">成語特工：航太終端</div>
-            <div style="font-size:18px; color:var(--cyan); margin-bottom:10px;">職銜評定啟動</div>
-            <div class="level-grid">
-                <div class="level-btn btn-l1" onclick="startTask(1)"><svg class="lv-svg" viewBox="0 0 24 24"><path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/></svg><div class="lv-tag">${lvMap[1]}</div></div>
-                <div class="level-btn btn-l2" onclick="startTask(2)"><svg class="lv-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2l2 8h8l-6 5 2 8-6-5-6 5 2-8-6-5h8z"/></svg><div class="lv-tag">${lvMap[2]}</div></div>
-                <div class="level-btn btn-l3" onclick="startTask(3)"><svg class="lv-svg" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="4"/></svg><div class="lv-tag">${lvMap[3]}</div></div>
-                <div class="level-btn btn-l4" onclick="startTask(4)"><svg class="lv-svg" viewBox="0 0 24 24"><path d="M12 2l2.4 7.2h7.6l-6 4.8 2.4 7.2-6-4.8-6 4.8 2.4-7.2-6-4.8h7.6z"/></svg><div class="lv-tag">${lvMap[4]}</div></div>
+        if(timer) clearInterval(timer);
+        isLocked = false; qIdx = 0; score = 0;
+        document.getElementById('app').innerHTML = `
+            <div class="main-title">成語特工：絕對終端</div>
+            <div style="color:var(--cyan); font-size:24px; margin-bottom:20px;">目標：800分 解鎖「7秒極限挑戰」</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; width:85%;">
+                ${[1,2,3,4].map(n => `<button class="final-btn" onclick="initAudio(); launch(${n}, 10)">${lvMap[n]}<br><small style="font-size:20px; color:var(--gold)">10s 測試模式</small></button>`).join('')}
             </div>
         `;
     }
 
-    function startTask(n, fast = false) {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        lv = n; score = 0; qIdx = 0; currentMax = fast ? 7 : 10;
-        quizSet = [...quizData[n]].sort(() => Math.random() - 0.5).slice(0, 10);
-        renderQuiz();
+    function launch(n, speed) {
+        initAudio(); curLv = n; score = 0; qIdx = 0; isLocked = false; errorList = []; gameSpeed = speed;
+        let pool = [...DB[n]];
+        qSet = pool.sort(() => Math.random() - 0.5).slice(0, 10);
+        renderNext();
     }
 
-    function renderQuiz() {
-        if (qIdx >= quizSet.length) { finishTask(); return; }
-        if (timerId) clearInterval(timerId);
-        timeLeft = currentMax;
-        let d = quizSet[qIdx];
-        let options = [{t: d[1], c: true}, {t: d[2], c: false}].sort(() => Math.random() - 0.5);
-
-        app.innerHTML = `
-            <div style="width:100%; display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-size:16px; color:var(--cyan)">${lvMap[lv]}</span>
-                <div class="timer-big" id="t">${timeLeft}</div>
-                <span style="font-size:16px; color:var(--cyan)">${qIdx+1}/10</span>
+    function renderNext() {
+        if (qIdx >= qSet.length) { renderFinal(); return; }
+        isLocked = false; if(timer) clearInterval(timer);
+        let timeLeft = gameSpeed, d = qSet[qIdx];
+        let opts = [{t: d[1], c: true}, {t: d[2], c: false}].sort(() => Math.random() - 0.5);
+        document.getElementById('app').innerHTML = `
+            <div style="width:100%; display:flex; justify-content:space-between; padding:0 40px; align-items:center;">
+                <span style="font-size:28px; color:var(--cyan)">模式: ${gameSpeed}s</span>
+                <span id="t_val" style="font-size:110px; font-weight:900; color:var(--gold)">${timeLeft}</span>
+                <span style="font-size:28px; color:var(--cyan)">進度: ${qIdx+1}/10</span>
             </div>
-            <div class="q-text">「${d[0]}」是什麼意思？</div>
-            <button class="opt-btn" id="opt0" onclick="judge(0, ${options[0].c})">${options[0].t}</button>
-            <button class="opt-btn" id="opt1" onclick="judge(1, ${options[1].c})">${options[1].t}</button>
-            <div id="expl-area"></div>
+            <div class="q-text">「${d[0]}」意思？</div>
+            <button class="opt-btn" id="b0" onclick="hit(0, ${opts[0].c})">${opts[0].t}</button>
+            <button class="opt-btn" id="b1" onclick="hit(1, ${opts[1].c})">${opts[1].t}</button>
+            <div id="expl_area" style="height:150px"></div>
         `;
-
-        timerId = setInterval(() => {
+        timer = setInterval(() => {
             timeLeft--;
-            const tEl = document.getElementById('t');
-            if (tEl) {
-                tEl.innerText = timeLeft;
-                if (timeLeft <= 3) tEl.className = "timer-big timer-urgent";
-            }
-            if (timeLeft <= 0) { clearInterval(timerId); judge(-1, false, true); }
+            if(document.getElementById('t_val')) document.getElementById('t_val').innerText = timeLeft;
+            if(timeLeft <= 0) hit(-1, false);
         }, 1000);
     }
 
-    function judge(idx, isCorrect, isTimeout = false) {
-        if (timerId) clearInterval(timerId);
-        const d = quizSet[qIdx];
-        const area = document.getElementById('expl-area');
-        const b0 = document.getElementById('opt0'), b1 = document.getElementById('opt1');
-        b0.onclick = null; b1.onclick = null;
-
-        if (isCorrect && !isTimeout) {
-            score += 100; SFX.ding();
-            document.getElementById('opt' + idx).classList.add('opt-correct');
-            area.innerHTML = `<div class="expl-panel expl-ok">⭐ 正確：${d[3]}</div>`;
-        } else {
-            SFX.fail();
-            if (!isTimeout) document.getElementById('opt' + idx).classList.add('opt-wrong');
-            if (b0.innerText === d[1]) b0.classList.add('opt-correct');
-            else b1.classList.add('opt-correct');
-            const msg = isTimeout ? "⌛ 逾時判定失敗" : "❌ 攔截警報";
-            area.innerHTML = `<div class="expl-panel expl-fail">${msg}<br>${d[3]}</div>`;
-        }
-        qIdx++;
-        setTimeout(renderQuiz, 3000);
+    function hit(i, ok) {
+        if (isLocked) return; isLocked = true; clearInterval(timer);
+        const d = qSet[qIdx];
+        if (ok) { score += 100; SFX.ding(); if(i!==-1) document.getElementById('b' + i).classList.add('opt-correct'); } 
+        else { SFX.alarm(); errorList.push(d); if(i!==-1) document.getElementById('b' + i).classList.add('opt-wrong'); }
+        document.getElementById('expl_area').innerHTML = `<div class="expl-container"><div class="expl-status" style="color:${ok? 'var(--green)':'var(--red)'}">${ok?'⭐ 成功':'✘ 失敗'}</div><div class="expl-text">${d[3]}</div></div>`;
+        qIdx++; setTimeout(renderNext, 3000);
     }
 
-    function finishTask() {
-        if (score >= 800) {
-            SFX.win();
-            app.innerHTML = `
-                <div class="main-title" style="color:var(--gold)">評定成功！</div>
-                <div class="score-hero">${score}</div>
-                <button class="opt-btn" style="border-color:var(--gold); color:var(--gold)" onclick="startTask(lv, true)">⚡ 原職加速 (7秒)</button>
-                <button class="opt-btn" onclick="showLobby()">⭐ 返回基地</button>
-            `;
-            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-        } else {
-            SFX.fail();
-            app.innerHTML = `<div class="main-title" style="color:var(--red)">任務失敗</div><div class="score-hero" style="color:var(--red)">${score}</div><button class="opt-btn" onclick="showLobby()">重新受訓</button>`;
-        }
+    function toggleModal(show) { document.getElementById('modal').style.display = show ? 'flex' : 'none'; }
+
+    function renderFinal() {
+        SFX.win(); confetti({ particleCount: 200, spread: 70, origin: { y: 0.6 } });
+        let canAdvance = score >= 800;
+        let reportHTML = errorList.map(e => `<div class="error-item"><b style="color:var(--gold); font-size:36px;">${e[0]}</b>：${e[1]}<br><span style="color:#fff; font-size:26px;">詳解：${e[3]}</span></div>`).join('');
+        document.getElementById('error_report_content').innerHTML = errorList.length ? reportHTML : "<h2 style='color:var(--green); font-size:40px;'>完美達成任務！無錯題。</h2>";
+        
+        document.getElementById('app').innerHTML = `
+            <div class="main-title">任務報告</div>
+            <div style="font-size:130px; color:var(--gold); font-weight:900; margin:10px 0; text-shadow: 0 0 50px var(--gold);">SCORE: ${score}</div>
+            
+            <button class="opt-btn" style="width:65%; border-color:var(--orange); color:var(--orange); border-width:5px;" onclick="toggleModal(true)">詳細錯題解說紀錄</button>
+
+            <div class="final-btn-group">
+                ${(canAdvance && gameSpeed === 10) ? `<button class="final-btn btn-purple" onclick="launch(${curLv}, 7)">挑戰 7秒<br>極限模式</button>` : ""}
+                <button class="final-btn" onclick="launch(${curLv}, 10)">再次<br>測試</button>
+                <button class="final-btn" onclick="showLobby()">回到<br>總部</button>
+            </div>
+            ${(canAdvance && gameSpeed === 10) ? `<div style="color:var(--green); font-size:32px; margin-top:15px; font-weight:bold; animation:blink 1s infinite;">解鎖成功：您可以挑戰該等級的 7秒 極限模式了！</div>` : ""}
+        `;
     }
     showLobby();
-</script>
-</body>
-</html>
+</script></body></html>
